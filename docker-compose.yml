@@ -1,0 +1,16 @@
+services:
+  falkordb:
+    image: falkordb/falkordb:latest
+    ports: ["6379:6379", "3000:3000"]   # 3000 = FalkorDB Browser
+    volumes: ["falkor-data:/var/lib/falkordb/data"]
+    healthcheck: { test: ["CMD", "redis-cli", "ping"], interval: 5s, retries: 10 }
+  app:
+    build: .
+    ports: ["8000:8000"]
+    env_file: [.env]                     # LLM_MODELS + provider API key
+    environment: { FALKORDB_HOST: falkordb, CLONE_DIR: /data/clones }
+    depends_on: { falkordb: { condition: service_healthy } }
+    volumes: ["clones:/data/clones"]
+volumes:
+  falkor-data:
+  clones:

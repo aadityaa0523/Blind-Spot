@@ -1,0 +1,759 @@
+{
+ "recorded": "2026-10-18",
+ "runs": [
+  {
+   "question": "I'm changing storage/graph_store.py: what else might break and who should review?",
+   "repo": "repo",
+   "events": [
+    {
+     "type": "step",
+     "agent": "MemoryKeeper",
+     "action": "recall",
+     "summary": "0 facts, 0 past episodes from graph mem_demo",
+     "ms": 1,
+     "t": 0.01
+    },
+    {
+     "type": "status",
+     "text": "Investigator is choosing graph tools...",
+     "t": 0.01
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "impact",
+     "summary": "{\"file\": \"graphrag_sdk/src/graphrag_sdk/storage/graph_store.py\", \"co_changed\": [{\"file\": \"graphrag_sdk/src/graphrag_sdk/api/main.py\", \"times_together\": 22, \"module\": \"graphrag_sdk/src\"}, {\"file\": \"gra",
+     "args": {
+      "file": "storage/graph_store.py"
+     },
+     "ok": true,
+     "ms": 9,
+     "path": [
+      [
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+       "CO_CHANGED_WITH x22",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+       "CO_CHANGED_WITH x15",
+       "graphrag_sdk/tests/test_graph_store.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+       "CO_CHANGED_WITH x12",
+       "CHANGELOG.md"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+       "CO_CHANGED_WITH x10",
+       "graphrag_sdk/src/graphrag_sdk/core/models.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+       "CO_CHANGED_WITH x9",
+       "graphrag_sdk/src/graphrag_sdk/storage/deduplicator.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+       "CO_CHANGED_WITH x7",
+       "graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+       "CO_CHANGED_WITH x7",
+       "graphrag_sdk/tests/test_facade.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+       "CO_CHANGED_WITH x6",
+       "graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py"
+      ]
+     ],
+     "t": 14.41
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "who_knows",
+     "summary": "{\"file\": \"graphrag_sdk/src/graphrag_sdk/storage/graph_store.py\", \"experts\": [{\"person\": \"Gal Shubeli\", \"commits\": 34, \"last_commit\": \"2026-09-28\"}, {\"person\": \"Naseem Ali\", \"commits\": 14, \"last_commit",
+     "args": {
+      "file": "storage/graph_store.py"
+     },
+     "ok": true,
+     "ms": 7,
+     "path": [
+      [
+       "Gal Shubeli",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ],
+      [
+       "Naseem Ali",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ],
+      [
+       "Shahar Biron",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ]
+     ],
+     "t": 14.42
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "why",
+     "summary": "{\"file\": \"graphrag_sdk/src/graphrag_sdk/storage/graph_store.py\", \"decisions\": [{\"commit\": \"0bf975ff\", \"date\": \"2026-09-28\", \"subject\": \"fix(dedup): never carry a legacy description vector onto a survi",
+     "args": {
+      "file": "storage/graph_store.py"
+     },
+     "ok": true,
+     "ms": 12,
+     "path": [
+      [
+       "Gal Shubeli",
+       "AUTHORED commit 0bf975ff",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ],
+      [
+       "Gal Shubeli",
+       "AUTHORED commit 16528c57",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ],
+      [
+       "Naseem Ali",
+       "AUTHORED commit 4e0e96a5",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ],
+      [
+       "Naseem Ali",
+       "AUTHORED commit ffc90c18",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ],
+      [
+       "Gal Shubeli",
+       "AUTHORED commit d0bdef53",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ]
+     ],
+     "t": 14.44
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "suggest_reviewers",
+     "summary": "{\"reviewers\": [{\"person\": \"Gal Shubeli\", \"commits\": 34, \"files_covered\": 1, \"of\": 1, \"last_active\": \"2026-09-28\"}, {\"person\": \"Naseem Ali\", \"commits\": 14, \"files_covered\": 1, \"of\": 1, \"last_active\": \"",
+     "args": {
+      "files": [
+       "storage/graph_store.py"
+      ]
+     },
+     "ok": true,
+     "ms": 10,
+     "path": [
+      [
+       "Gal Shubeli",
+       "AUTHORED->TOUCHED",
+       "1/1 files"
+      ],
+      [
+       "Naseem Ali",
+       "AUTHORED->TOUCHED",
+       "1/1 files"
+      ],
+      [
+       "Shahar Biron",
+       "AUTHORED->TOUCHED",
+       "1/1 files"
+      ]
+     ],
+     "t": 14.45
+    },
+    {
+     "type": "status",
+     "text": "Writer is composing an answer from the evidence...",
+     "t": 21.42
+    },
+    {
+     "type": "step",
+     "agent": "Writer",
+     "action": "answer",
+     "summary": "answer verified: every file named comes from graph evidence",
+     "model": "gemini/gemini-3.7-flash",
+     "grounded": true,
+     "t": 28.71
+    },
+    {
+     "type": "step",
+     "agent": "MemoryKeeper",
+     "action": "remember",
+     "summary": "stored 1 episode + 1 fact(s) in graph mem_demo",
+     "t": 28.73
+    },
+    {
+     "type": "final",
+     "answer": "Based on the repository history for `graphrag_sdk/src/graphrag_sdk/storage/graph_store.py`:\n\n### What Else Might Break\nChanges frequently co-occur with several core modules and tests that may be impacted:\n- **`graphrag_sdk/src/graphrag_sdk/api/main.py`** (co-changed 22 times)\n- **`graphrag_sdk/tests/test_graph_store.py`** (co-changed 15 times)\n- **`CHANGELOG.md`** (co-changed 12 times)\n- **`graphrag_sdk/src/graphrag_sdk/core/models.py`** (co-changed 10 times)\n- **`graphrag_sdk/src/graphrag_sdk/storage/deduplicator.py`** (co-changed 9 times)\n- **`graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py`** (co-changed 7 times)\n- **`graphrag_sdk/tests/test_facade.py`** (co-changed 7 times)\n- **`graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py`** (co-changed 6 times)\n\nRecent commit history (commits `0bf975ff`, `16528c57` on PR #335; `4e0e96a5`, `ffc90c18` on PR #327; and `d0bdef53` on PR #325) highlights sensitive areas around deduplication, entity merge invariants, label formatting, and handling of legacy description vectors (`LEGACY_DESC_KEYS`).\n\n### Who Knows the Code\n- **Gal Shubeli** (34 commits, last active 2026-09-28)\n- **Naseem Ali** (14 commits, last active 2026-09-15)\n- **Shahar Biron** (1 commit, last active 2026-04-18)\n\nSuggested action: Ask Gal Shubeli or Naseem Ali to review your changes.",
+     "graph": {
+      "nodes": [
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/api/main.py"
+       },
+       {
+        "id": "graphrag_sdk/tests/test_graph_store.py"
+       },
+       {
+        "id": "CHANGELOG.md"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/core/models.py"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/storage/deduplicator.py"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py"
+       },
+       {
+        "id": "graphrag_sdk/tests/test_facade.py"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py"
+       },
+       {
+        "id": "Gal Shubeli"
+       },
+       {
+        "id": "Naseem Ali"
+       },
+       {
+        "id": "Shahar Biron"
+       },
+       {
+        "id": "1/1 files"
+       }
+      ],
+      "links": [
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "CO_CHANGED_WITH x22"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "target": "graphrag_sdk/tests/test_graph_store.py",
+        "label": "CO_CHANGED_WITH x15"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "target": "CHANGELOG.md",
+        "label": "CO_CHANGED_WITH x12"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/core/models.py",
+        "label": "CO_CHANGED_WITH x10"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/deduplicator.py",
+        "label": "CO_CHANGED_WITH x9"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/ingestion/extraction_strategies/graph_extraction.py",
+        "label": "CO_CHANGED_WITH x7"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "target": "graphrag_sdk/tests/test_facade.py",
+        "label": "CO_CHANGED_WITH x7"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py",
+        "label": "CO_CHANGED_WITH x6"
+       },
+       {
+        "source": "Gal Shubeli",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "Shahar Biron",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "Gal Shubeli",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "AUTHORED commit 0bf975ff"
+       },
+       {
+        "source": "Gal Shubeli",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "AUTHORED commit 16528c57"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "AUTHORED commit 4e0e96a5"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "AUTHORED commit ffc90c18"
+       },
+       {
+        "source": "Gal Shubeli",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "AUTHORED commit d0bdef53"
+       },
+       {
+        "source": "Gal Shubeli",
+        "target": "1/1 files",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "1/1 files",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "Shahar Biron",
+        "target": "1/1 files",
+        "label": "AUTHORED->TOUCHED"
+       }
+      ]
+     },
+     "task": "51e9b77a",
+     "grounded": true,
+     "repo": "repo",
+     "t": 28.73
+    }
+   ]
+  },
+  {
+   "question": "What are the most load-bearing files, who knows the top one best, and what changes together with it?",
+   "repo": "repo",
+   "events": [
+    {
+     "type": "step",
+     "agent": "MemoryKeeper",
+     "action": "recall",
+     "summary": "1 facts, 0 past episodes from graph mem_demo",
+     "ms": 3,
+     "t": 0.01
+    },
+    {
+     "type": "status",
+     "text": "Investigator is choosing graph tools...",
+     "t": 0.01
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "load_bearing",
+     "summary": "{\"load_bearing\": [{\"file\": \"graphrag_sdk/src/graphrag_sdk/api/main.py\", \"score\": 0.0295}, {\"file\": \"CHANGELOG.md\", \"score\": 0.019}, {\"file\": \"graphrag_sdk/src/graphrag_sdk/storage/graph_store.py\", \"sc",
+     "args": {},
+     "ok": true,
+     "ms": 8,
+     "path": [],
+     "t": 6.24
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "who_knows",
+     "summary": "{\"file\": \"graphrag_sdk/src/graphrag_sdk/api/main.py\", \"experts\": [{\"person\": \"Gal Shubeli\", \"commits\": 92, \"last_commit\": \"2026-09-30\"}, {\"person\": \"Naseem Ali\", \"commits\": 21, \"last_commit\": \"2026-09",
+     "args": {
+      "file": "graphrag_sdk/src/graphrag_sdk/api/main.py"
+     },
+     "ok": true,
+     "ms": 11,
+     "path": [
+      [
+       "Gal Shubeli",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "Naseem Ali",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "drr00t",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ]
+     ],
+     "t": 8.52
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "impact",
+     "summary": "{\"file\": \"graphrag_sdk/src/graphrag_sdk/api/main.py\", \"co_changed\": [{\"file\": \"graphrag_sdk/tests/test_facade.py\", \"times_together\": 37, \"module\": \"graphrag_sdk/tests\"}, {\"file\": \"graphrag_sdk/src/gra",
+     "args": {
+      "file": "graphrag_sdk/src/graphrag_sdk/api/main.py"
+     },
+     "ok": true,
+     "ms": 9,
+     "path": [
+      [
+       "graphrag_sdk/src/graphrag_sdk/api/main.py",
+       "CO_CHANGED_WITH x37",
+       "graphrag_sdk/tests/test_facade.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/api/main.py",
+       "CO_CHANGED_WITH x22",
+       "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/api/main.py",
+       "CO_CHANGED_WITH x21",
+       "CHANGELOG.md"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/api/main.py",
+       "CO_CHANGED_WITH x18",
+       "graphrag_sdk/src/graphrag_sdk/core/models.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/api/main.py",
+       "CO_CHANGED_WITH x15",
+       "graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/api/main.py",
+       "CO_CHANGED_WITH x14",
+       "graphrag_sdk/src/graphrag_sdk/storage/ontology_store.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/api/main.py",
+       "CO_CHANGED_WITH x13",
+       "graphrag_sdk/src/graphrag_sdk/__init__.py"
+      ],
+      [
+       "graphrag_sdk/src/graphrag_sdk/api/main.py",
+       "CO_CHANGED_WITH x11",
+       "docs/structured-ingestion.mdx"
+      ]
+     ],
+     "t": 8.54
+    },
+    {
+     "type": "status",
+     "text": "Writer is composing an answer from the evidence...",
+     "t": 8.54
+    },
+    {
+     "type": "step",
+     "agent": "Writer",
+     "action": "answer",
+     "summary": "answer verified: every file named comes from graph evidence",
+     "model": "gemini/gemini-3.7-flash",
+     "grounded": true,
+     "t": 19.21
+    },
+    {
+     "type": "step",
+     "agent": "MemoryKeeper",
+     "action": "remember",
+     "summary": "stored 1 episode + 1 fact(s) in graph mem_demo",
+     "t": 19.22
+    },
+    {
+     "type": "final",
+     "answer": "Last time you asked about reviewers for `graph_store.py` (which ranks third in load-bearing score and frequently co-changes with the top file).\n\n**Top Load-Bearing Files:**\n1. `graphrag_sdk/src/graphrag_sdk/api/main.py` (score: 0.0295)\n2. `CHANGELOG.md` (score: 0.019)\n3. `graphrag_sdk/src/graphrag_sdk/storage/graph_store.py` (score: 0.015)\n4. `graphrag_sdk/src/graphrag_sdk/storage/deduplicator.py` (score: 0.0128)\n5. `graphrag_sdk/tests/test_facade.py` (score: 0.0117)\n\n**Who Knows the Top File Best:**\nFor `graphrag_sdk/src/graphrag_sdk/api/main.py`, **Gal Shubeli** knows it best with 92 commits (last commit: 2026-09-30), followed by **Naseem Ali** (21 commits) and **drr00t** (1 commit).\n\n**Files Changing Together with It:**\n* `graphrag_sdk/tests/test_facade.py` (37 times)\n* `graphrag_sdk/src/graphrag_sdk/storage/graph_store.py` (22 times)\n* `CHANGELOG.md` (21 times)\n* `graphrag_sdk/src/graphrag_sdk/core/models.py` (18 times)\n* `graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py` (15 times)\n* `graphrag_sdk/src/graphrag_sdk/storage/ontology_store.py` (14 times)\n* `graphrag_sdk/src/graphrag_sdk/__init__.py` (13 times)\n* `docs/structured-ingestion.mdx` (11 times)",
+     "graph": {
+      "nodes": [
+       {
+        "id": "Gal Shubeli"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/api/main.py"
+       },
+       {
+        "id": "Naseem Ali"
+       },
+       {
+        "id": "drr00t"
+       },
+       {
+        "id": "graphrag_sdk/tests/test_facade.py"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"
+       },
+       {
+        "id": "CHANGELOG.md"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/core/models.py"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/storage/ontology_store.py"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/__init__.py"
+       },
+       {
+        "id": "docs/structured-ingestion.mdx"
+       }
+      ],
+      "links": [
+       {
+        "source": "Gal Shubeli",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "drr00t",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "target": "graphrag_sdk/tests/test_facade.py",
+        "label": "CO_CHANGED_WITH x37"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/graph_store.py",
+        "label": "CO_CHANGED_WITH x22"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "target": "CHANGELOG.md",
+        "label": "CO_CHANGED_WITH x21"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/core/models.py",
+        "label": "CO_CHANGED_WITH x18"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/ingestion/pipeline.py",
+        "label": "CO_CHANGED_WITH x15"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/storage/ontology_store.py",
+        "label": "CO_CHANGED_WITH x14"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "target": "graphrag_sdk/src/graphrag_sdk/__init__.py",
+        "label": "CO_CHANGED_WITH x13"
+       },
+       {
+        "source": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "target": "docs/structured-ingestion.mdx",
+        "label": "CO_CHANGED_WITH x11"
+       }
+      ]
+     },
+     "task": "bc1dd8fb",
+     "grounded": true,
+     "repo": "repo",
+     "t": 19.22
+    }
+   ]
+  },
+  {
+   "question": "Who knows api/main.py best, and why was it built the way it is?",
+   "repo": "repo",
+   "events": [
+    {
+     "type": "step",
+     "agent": "MemoryKeeper",
+     "action": "recall",
+     "summary": "2 facts, 0 past episodes from graph mem_demo",
+     "ms": 3,
+     "t": 0.01
+    },
+    {
+     "type": "status",
+     "text": "Investigator is choosing graph tools...",
+     "t": 0.01
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "who_knows",
+     "summary": "{\"file\": \"graphrag_sdk/src/graphrag_sdk/api/main.py\", \"experts\": [{\"person\": \"Gal Shubeli\", \"commits\": 92, \"last_commit\": \"2026-09-30\"}, {\"person\": \"Naseem Ali\", \"commits\": 21, \"last_commit\": \"2026-09",
+     "args": {
+      "file": "api/main.py"
+     },
+     "ok": true,
+     "ms": 10,
+     "path": [
+      [
+       "Gal Shubeli",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "Naseem Ali",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "drr00t",
+       "AUTHORED->TOUCHED",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ]
+     ],
+     "t": 4.52
+    },
+    {
+     "type": "step",
+     "agent": "Investigator",
+     "action": "why",
+     "summary": "{\"file\": \"graphrag_sdk/src/graphrag_sdk/api/main.py\", \"decisions\": [{\"commit\": \"4e0e96a5\", \"date\": \"2026-09-15\", \"subject\": \"fix(dedup): review round 4 on #327 \\u2014 cached description vectors, hones",
+     "args": {
+      "file": "api/main.py"
+     },
+     "ok": true,
+     "ms": 12,
+     "path": [
+      [
+       "Naseem Ali",
+       "AUTHORED commit 4e0e96a5",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "Naseem Ali",
+       "AUTHORED commit 6878bce5",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "Naseem Ali",
+       "AUTHORED commit fe13f761",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "Gal Shubeli",
+       "AUTHORED commit ab960651",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ],
+      [
+       "Gal Shubeli",
+       "AUTHORED commit d0bdef53",
+       "graphrag_sdk/src/graphrag_sdk/api/main.py"
+      ]
+     ],
+     "t": 4.54
+    },
+    {
+     "type": "status",
+     "text": "Writer is composing an answer from the evidence...",
+     "t": 10.86
+    },
+    {
+     "type": "step",
+     "agent": "Writer",
+     "action": "answer",
+     "summary": "answer verified: every file named comes from graph evidence",
+     "model": "gemini/gemini-3.6-flash",
+     "grounded": true,
+     "t": 24.98
+    },
+    {
+     "type": "step",
+     "agent": "MemoryKeeper",
+     "action": "remember",
+     "summary": "stored 1 episode + 1 fact(s) in graph mem_demo",
+     "t": 24.98
+    },
+    {
+     "type": "final",
+     "answer": "Last time you asked about reviewers for `graph_store.py`.\n\n**Gal Shubeli** knows `graphrag_sdk/src/graphrag_sdk/api/main.py` best (92 commits), followed by **Naseem Ali** (21 commits) and **drr00t** (1 commit).\n\nRecent architectural decisions for `api/main.py` focused on deduplication, entity resolution, and memory bounds:\n\n* **Entity Resolution & Remapping (Gal Shubeli)**: PR 325 (commit `d0bdef53`) flattened `id_remap` inside `remap_relationships` to preserve merge invariants and eliminate dangling edges. PR 326 (commit `ab960651`) bounded the ambiguous clustering matrix to prevent ~9.3 GiB memory spikes at scale.\n* **Deduplication & Judging (Naseem Ali)**: PR 327 (commits `4e0e96a5`, `6878bce5`, `fe13f761`) added cached description vectors using SHA256 text hashes, unioned per-set agreements to prevent chaining disjoint entities, set density bounds, and filtered keyed `distinct_ids` prior to LLM judging.",
+     "graph": {
+      "nodes": [
+       {
+        "id": "Gal Shubeli"
+       },
+       {
+        "id": "graphrag_sdk/src/graphrag_sdk/api/main.py"
+       },
+       {
+        "id": "Naseem Ali"
+       },
+       {
+        "id": "drr00t"
+       }
+      ],
+      "links": [
+       {
+        "source": "Gal Shubeli",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "drr00t",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED->TOUCHED"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED commit 4e0e96a5"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED commit 6878bce5"
+       },
+       {
+        "source": "Naseem Ali",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED commit fe13f761"
+       },
+       {
+        "source": "Gal Shubeli",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED commit ab960651"
+       },
+       {
+        "source": "Gal Shubeli",
+        "target": "graphrag_sdk/src/graphrag_sdk/api/main.py",
+        "label": "AUTHORED commit d0bdef53"
+       }
+      ]
+     },
+     "task": "324f7d31",
+     "grounded": true,
+     "repo": "repo",
+     "t": 24.98
+    }
+   ]
+  }
+ ]
+}

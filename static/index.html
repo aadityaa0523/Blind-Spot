@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blindspot: never merge blind</title>
+<meta name="description" content="Paste a pull request. Blindspot keeps your repository's memory in a FalkorDB graph and tells you what the change usually drags along, who should review it, and why the code looks the way it does.">
+<meta property="og:title" content="Blindspot: never merge blind">
+<meta property="og:description" content="A graph of people, commits and files that tells you what a pull request usually drags along, and who should review it.">
+<meta name="theme-color" content="#0a0f1a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 26'%3E%3Crect width='26' height='26' rx='6' fill='%230a0f1a'/%3E%3Ccircle cx='6' cy='13' r='3' fill='%23b6f36a'/%3E%3Ccircle cx='19' cy='6' r='3' fill='%23b6f36a'/%3E%3Ccircle cx='19' cy='20' r='3' fill='%236cb6ff'/%3E%3Cpath d='M8.6 11.7 16.4 7.3M8.6 14.3 16.4 18.7' stroke='%23b6f36a' stroke-width='1.6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css?v=9">
+<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="banner">Built for the FalkorDB Graph Hacks · <a href="#judge">Judge it in 90 seconds →</a></div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#home" aria-label="Blindspot home">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true"><circle cx="6" cy="13" r="3" fill="#b6f36a"/><circle cx="19" cy="6" r="3" fill="#b6f36a"/><circle cx="19" cy="20" r="3" fill="#6cb6ff"/><path d="M8.6 11.7 16.4 7.3M8.6 14.3 16.4 18.7" stroke="#b6f36a" stroke-width="1.6"/></svg>
+      <span>Blind<i>spot</i></span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Sections">
+      <a href="#home" data-tab="home">Home</a><a href="#gate" data-tab="gate">Merge gate</a><a href="#board" data-tab="board">Board</a><a href="#analytics" data-tab="analytics">Analytics</a><a href="#audit" data-tab="audit">Audit</a><a href="#ask" data-tab="ask">Ask</a><a href="#proof" data-tab="proof">Proof</a><a href="#safety" data-tab="safety">Safety</a>
+    </nav>
+    <span class="grow"></span>
+    <span class="livepill" id="livepill"><i></i><span id="livetext">live · FalkorDB</span></span>
+    <a class="btn" href="#gate">Check a PR</a>
+    <button class="menu-btn ghost" id="menubtn" aria-expanded="false" aria-controls="nav" aria-label="Menu">Menu</button>
+  </div>
+</header>
+<div class="subbar" id="subbar" hidden>
+  <div class="wrap">
+    <label for="repo">Repository</label>
+    <select id="repo" aria-label="Repository"></select>
+    <button class="ghost" id="addbtn" style="padding:8px 14px">+ Add GitHub repo</button>
+  </div>
+</div>
+
+<div id="main" tabindex="-1">
+<!-- ================= HOME ================= -->
+<main class="page" id="p-home">
+  <section class="hero-home">
+    <h1>Never merge <em>blind</em>.</h1>
+    <p class="lede">Blindspot keeps your repository's memory in a graph. Paste a pull request and it tells you what the change usually drags along, who should review it, and why the code looks the way it does.</p>
+    <div class="cta-row">
+      <a class="btn lg" href="#gate">Check a pull request</a>
+      <button class="ghost lg" data-action="replay">▶ Watch an agent run</button>
+      <a class="btn ghost lg" href="#proof">How it's measured</a>
+    </div>
+    <div class="window" aria-label="Live preview of a merge gate verdict">
+      <div class="bar"><i></i><i></i><i></i><span id="pv-title">merge gate · loading a real pull request…</span></div>
+      <div class="body" id="pv-body">
+        <div><div class="skel" style="height:132px;width:132px;border-radius:50%"></div><div class="skel" style="height:18px;margin-top:18px"></div><div class="skel" style="height:18px;margin-top:10px;width:70%"></div></div>
+        <div><div class="skel" style="height:18px"></div><div class="skel" style="height:56px;margin-top:12px"></div><div class="skel" style="height:56px;margin-top:12px"></div></div>
+      </div>
+    </div>
+    <p class="pv-note" id="pv-note"></p>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><span class="lab">Built on</span>
+    <div class="track" id="track"></div></div>
+
+  <section class="band band-teal">
+    <div class="wrap">
+      <h2>Numbers, not <em>adjectives</em>.</h2>
+      <p class="sub">Live from this deployment's database. Nothing on this strip is hand-typed.</p>
+      <div class="statgrid">
+        <div class="bigstat"><b id="s-repos">–</b><span>repositories read</span></div>
+        <div class="bigstat"><b id="s-commits">–</b><span>commits in the graph</span></div>
+        <div class="bigstat"><b id="s-edges">–</b><span>relationships traversed</span></div>
+        <div class="bigstat"><b id="s-ms">–</b><span id="s-ms-l">to analyse a pull request</span></div>
+        <div class="bigstat"><b id="s-lift">–</b><span>better than guessing, backtested</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-paper">
+    <div class="wrap">
+      <h2>Three steps, <em>no magic</em>.</h2>
+      <p class="sub">Every verdict can be traced back to a query you can run yourself in FalkorDB Browser.</p>
+      <div class="steps">
+        <article class="step-card"><div class="n">01 · READ</div><h3>Read the history</h3>
+          <p>Only <code>git log</code> and <code>git ls-tree</code>. No checkout, and no code from the repository is ever run.</p>
+<pre class="code"><span class="c"># history only, blobless</span>
+git clone <span class="k">--filter=blob:none</span> \
+          <span class="k">--no-checkout</span> &lt;url&gt;</pre></article>
+        <article class="step-card"><div class="n">02 · WALK</div><h3>Walk the graph</h3>
+          <p>People, commits and files become nodes. Files that change together get a weighted edge.</p>
+<pre class="code">MATCH (f:File)-[e:<span class="k">CO_CHANGED_WITH</span>]-&gt;(o:File)
+WHERE f.path IN $files
+  AND NOT o.path IN $files
+RETURN o.path, e.weight</pre></article>
+        <article class="step-card"><div class="n">03 · EXPLAIN</div><h3>Explain every point</h3>
+          <p>Load-bearing files, missing companions, module spread and size add up to a score, each shown beside its reason.</p>
+<pre class="code">Load-bearing file    <span class="k">35</span> / 35
+Missing companions   <span class="k">37</span> / 40
+Spans modules        <span class="k">10</span> / 10
+Change size           <span class="k">6</span> / 15</pre></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <h2>Review with <em>memory</em>.</h2>
+      <p class="sub">Everything below runs on the same graph.</p>
+      <div class="features">
+        <article class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg><h3>Probably forgotten</h3><p>Files that changed with these in at least a quarter of their commits, but are missing from this pull request, with a confidence for each.</p></article>
+        <article class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><h3>Reviewer routing</h3><p>Ranked by how many of the changed files each person has actually authored, with recency, not by who is free.</p></article>
+        <article class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><h3>Decisions with receipts</h3><p>The commit message that explains why a file looks the way it does, quoted with its author, date and pull request.</p></article>
+        <article class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7l8 1M7 8l4 8M17 10l-4 6"/></svg><h3>An agent crew that remembers</h3><p>Four agents hand off through the graph. Each user gets an isolated memory graph that later answers recall.</p></article>
+        <article class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v5M15 3v5M6 8h12v4a6 6 0 01-12 0z"/><path d="M12 18v3"/></svg><h3>Use it from your editor</h3><p>The same graph tools are exposed over MCP, so Claude Desktop, Cursor and others can query your repositories.</p></article>
+        <article class="feat"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><h3>Add any public repository</h3><p>Paste a GitHub URL and a new graph is built in about half a minute. Large histories are capped at the latest 2,000 commits.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-alt">
+    <div class="wrap">
+      <h2>Built around how review <em>actually works</em>.</h2>
+      <div class="trust">
+        <div><h3>Evidence before the model</h3><p>The gate never asks a model for a score. It walks the graph, then shows you the path it took.</p></div>
+        <div><h3>Honest numbers</h3><p>A walk-forward backtest, shown on the Proof page, including the small repository where the signal is weak.</p></div>
+        <div><h3>Fixed tools, no generated queries</h3><p>The agents choose between six parameterised tools. Model output is never concatenated into a query.</p></div>
+        <div><h3>Nothing is executed</h3><p>History is read, never run. Unknown files are reported as unknown, never as safe.</p></div>
+      </div>
+      <p style="margin-top:30px"><a class="btn ghost" href="#safety">Read the safety notes</a></p>
+    </div>
+  </section>
+
+  <section class="band" id="judge">
+    <div class="wrap">
+      <h2>Judge this in <em>90 seconds</em>.</h2>
+      <p class="sub">Four stops, in order. No account, and the first three need no API key.</p>
+      <div class="judge">
+        <div class="row"><span class="t">0:00</span><div><b>Check a real pull request</b><span class="d">An 8-file GraphRAG-SDK PR: a verdict, the missing files, a reviewer and the commit that explains why.</span></div><button data-action="gate335">Run PR #335</button></div>
+        <div class="row"><span class="t">0:30</span><div><b>See how it is measured</b><span class="d">A walk-forward backtest computed live, with its weak spots listed.</span></div><a class="btn ghost" href="#proof">Open Proof</a></div>
+        <div class="row"><span class="t">0:50</span><div><b>Watch the agent crew</b><span class="d">A recorded real run: four agents, graph queries in milliseconds, memory from an earlier session.</span></div><button class="ghost" data-action="replay">▶ Play recording</button></div>
+        <div class="row"><span class="t">1:15</span><div><b>Bring your own repository</b><span class="d">Paste any public GitHub URL and get a graph in about 30 seconds.</span></div><button class="ghost" data-action="addrepo">Add a repo</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-alt" id="faq">
+    <div class="wrap">
+      <h2>Good <em>questions</em>.</h2>
+      <div class="faq">
+        <details><summary>Does it use an LLM?</summary><p>The merge gate does not: it is graph queries, so it is fast and gives the same answer twice. The Ask page uses a model only to choose between six fixed graph tools and to phrase the result, and an answer that names a file not found in the evidence is withheld.</p></details>
+        <details><summary>How accurate is it?</summary><p>On GraphRAG-SDK the gate puts a deliberately hidden file in its top three companions 35% of the time, against 14% for guessing the most-changed files. On the much smaller falkordb-py it is 20% against 18%. It is a useful signal on a large active repository, not proof of anything. The Proof page shows the live numbers.</p></details>
+        <details><summary>Is it safe to point at my repository?</summary><p>It reads public repositories through <code>git log</code> and never executes their code. This demo has no authentication, so do not use it for private code.</p></details>
+        <details><summary>What does it need to run?</summary><p>FalkorDB (one Docker command) and git. A model API key is needed only for the Ask page. The merge gate and the recorded run work without one.</p></details>
+        <details><summary>What can't it do?</summary><p>It is not a static analyser, so it cannot see imports that have never changed together. It does not read PR comments or issues yet. New files have no history, so they are reported as unknown rather than safe.</p></details>
+        <details><summary>Why FalkorDB?</summary><p>The gate walks relationships on every request: PageRank, multi-hop co-change and shortest path in milliseconds. And one instance holds a separate graph per user for the agents' memory, with no extra deployments.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="ctaband"><div class="ctabox"><h2>Check your next PR before you merge it.</h2><p>Paste a pull request URL and see what it usually drags along.</p><a class="btn lg" href="#gate">Open the merge gate</a></div></section>
+</main>
+
+<main class="page app-page" id="p-gate">
+  <section class="hero">
+    <h1>Never merge <em>blind</em>.</h1>
+    <p class="lede">Paste a pull request. Blindspot reads the repository's memory, kept as a FalkorDB graph of people, commits and files, and tells you what this change usually drags along, who should review it, and why the code looks the way it does.</p>
+    <form class="gatebox" id="gateform">
+      <input id="prurl" type="url" placeholder="https://github.com/FalkorDB/GraphRAG-SDK/pull/335" aria-label="Pull request URL" autocomplete="off">
+      <button id="gatego" type="submit">Check this PR</button>
+    </form>
+    <div class="examples" id="examples"></div>
+    <details class="files"><summary>or paste file paths instead</summary>
+      <textarea id="gfiles" aria-label="File paths, one per line" placeholder="one file path per line"></textarea>
+      <div class="row" style="justify-content:center"><button class="ghost" id="gfbtn" type="button">Check these files</button></div></details>
+  </section>
+  <div id="gresult"></div>
+</main>
+<main class="page app-page" id="p-ask">
+  <div class="grid">
+    <section>
+      <div class="card">
+        <h2>Ask your codebase</h2>
+        <div class="row" style="margin:0 0 10px"><label for="user" style="color:var(--mute)">You are</label>
+          <input id="user" value="alice" style="max-width:130px"><span style="color:var(--mute);font-size:13px">each user gets a separate memory graph</span></div>
+        <textarea id="q" aria-label="Question" placeholder="Click a node in the graph, or ask: I'm changing X, what else might break and who should review?"></textarea>
+        <div class="row"><button id="go">Ask</button><button class="ghost" id="replay" title="Replays a real run recorded earlier. No live model call.">▶ Watch a recorded run</button><span class="chips" id="chips"></span></div>
+      </div>
+      <div class="card"><h2>Agent crew <span id="gstate"></span></h2><div class="trace" id="trace"><div class="status">Ask a question to watch the agents hand off through the graph.</div></div></div>
+      <div class="card"><h2>Answer</h2><div id="answer" class="empty">Nothing yet.</div></div>
+    </section>
+    <section>
+      <div class="card"><h2>Evidence graph <span style="text-transform:none;letter-spacing:0;font-weight:400">grey: load-bearing · red: this answer</span></h2>
+        <div id="graph" role="img" aria-label="Graph of files and the evidence path behind the latest answer"></div>
+        <div id="nodeinfo" class="empty" style="margin-top:8px;word-break:break-all">Click a node to ask about it.</div></div>
+      <div class="card"><h2>Memory graph of <span id="mu" style="color:var(--text);text-transform:none;letter-spacing:0">alice</span></h2><div id="memgraph"></div></div>
+    </section>
+  </div>
+</main>
+<main class="page app-page" id="p-proof">
+  <section class="hero" style="margin-bottom:10px">
+    <h1>Does the gate <em>actually</em> work?</h1>
+    <p class="lede">Every number below is computed live from this repository's own history. Nothing is hand-picked.</p>
+  </section>
+  <div class="card"><h2>Walk-forward backtest <span class="tiles" id="tiles"></span></h2>
+    <div class="stats" id="proofstats"><div class="empty">Running the backtest…</div></div>
+    <p class="empty" id="proofnote" style="margin:14px 0 0"></p></div>
+  <div class="cols">
+    <div class="card"><h2>How the score is made</h2>
+      <ul class="clean"><li><b>Load-bearing</b> (35): PageRank over the co-change graph. Docs and lockfiles are ignored.</li>
+        <li><b>Missing companions</b> (40): files that changed with these in 25%+ of their commits but aren't in this change.</li>
+        <li><b>Spans modules</b> (10) and <b>size</b> (15).</li>
+        <li>The verdict compares the score with the repository's own past changes (HIGH above the 80th percentile, MEDIUM above the 50th).</li>
+        <li>Every point is shown next to its reason. There is no hidden model score.</li></ul></div>
+    <div class="card"><h2>What the AI can and can't do</h2>
+      <ul class="clean"><li>The gate itself uses <b>no LLM</b>: graph queries only, so it is fast and repeatable.</li>
+        <li>The Ask page's model picks from <b>six fixed, parameterised tools</b>. It never writes Cypher.</li>
+        <li>Answers may only name files found in the evidence, or they are withheld.</li>
+        <li>History is read with <code>git log</code>; no repository code is ever run.</li></ul></div>
+    <div class="card"><h2>Known gaps (we'd rather say so)</h2>
+      <ul class="clean"><li>Co-change is a statistical signal, not a dependency analysis.</li>
+        <li>It is weak on small or young repos: see the lift above.</li>
+        <li>Demo PRs are already merged, so their own commits are part of the history.</li>
+        <li>Decisions come from commit messages only; PR comments and issues are not ingested yet.</li></ul></div>
+  </div>
+</main>
+
+<!-- ================= BOARD ================= -->
+<main class="page app-page" id="p-board">
+  <div class="pagehead"><div><h1>Gate <em>board</em></h1><p>Every pull request the gate has read, newest first. Click one to open its full verdict.</p></div>
+    <div class="chipbar" id="boardfilters" role="group" aria-label="Filter by verdict">
+      <button class="ghost on" data-v="">All</button><button class="ghost" data-v="HIGH">High</button><button class="ghost" data-v="MEDIUM">Medium</button><button class="ghost" data-v="LOW">Low</button></div></div>
+  <div class="boardgrid" id="boardlist"><div class="empty">Loading checks…</div></div>
+</main>
+
+<!-- ================= ANALYTICS ================= -->
+<main class="page app-page" id="p-analytics">
+  <div class="pagehead"><div><h1><em>Analytics</em></h1><p>What the gate has seen so far, all computed from the audit graph.</p></div>
+    <div class="row" style="margin:0"><a class="btn ghost" id="reportlink" href="/api/report?repo_name=repo" download="blindspot-report.md">Download report (.md)</a></div></div>
+  <div class="stats" id="anstats"></div>
+  <div class="cols" style="margin-top:18px">
+    <div class="card"><h2>Verdicts</h2><div id="andist"></div></div>
+    <div class="card"><h2>Files most often flagged as forgotten</h2><div id="anmissing"></div></div>
+    <div class="card"><h2>Files in HIGH or MEDIUM checks</h2><div id="anflagged"></div></div>
+    <div class="card"><h2>Recommended reviewers</h2><div id="anrev"></div></div>
+    <div class="card"><h2>Checks per repository</h2><div id="anrepos"></div></div>
+  </div>
+</main>
+
+<!-- ================= AUDIT ================= -->
+<main class="page app-page" id="p-audit">
+  <div class="pagehead"><div><h1>Audit <em>log</em></h1><p>Each verdict is stored in the graph with the hash of the one before it, so an edited or removed record is detectable.</p></div>
+    <div class="row" style="margin:0"><button id="verifybtn">Verify the chain</button></div></div>
+  <div class="card" id="chainstate" aria-live="polite"><div class="empty">Press <b>Verify the chain</b> to recompute every hash.</div></div>
+  <div class="card" style="overflow:auto"><table class="table" id="audittable"><thead><tr><th>#</th><th>Time</th><th>Repo</th><th>Change</th><th>Verdict</th><th>ms</th><th>Hash</th></tr></thead><tbody></tbody></table>
+    <p class="empty" style="margin:12px 0 0">This detects edits; it is not a signature. Anyone with write access to the database could recompute the chain.</p></div>
+</main>
+
+<!-- ================= INTEGRATE ================= -->
+<main class="page" id="p-integrate">
+  <div class="prose">
+    <h1 style="font-family:var(--serif);font-weight:400;font-size:clamp(40px,6vw,64px);line-height:1.05;margin:24px 0 10px">Use it <em style="color:var(--go)">where you work</em>.</h1>
+    <p>Three ways to put the gate in front of every change. All of them call the same graph; none needs an LLM key except the agents.</p>
+
+    <h2>In CI: comment on every PR, fail on HIGH</h2>
+    <p>A small script with no dependencies and a workflow that runs it. It never breaks your build because the server was down, unless you pass <code>--strict</code>.</p>
+    <div class="snippet"><button class="ghost" data-copy>Copy</button><pre class="code">name: blindspot-gate
+on: { pull_request: { types: [opened, synchronize, reopened] } }
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    permissions: { pull-requests: write, contents: read }
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        run: |
+          set +e
+          python integrations/gate_ci.py --url "${{ vars.BLINDSPOT_URL }}" \
+            --pr "${{ github.event.pull_request.html_url }}" --fail-on HIGH --markdown comment.md
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - if: hashFiles('comment.md') != ''
+        run: gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md
+        env: { GH_TOKEN: "${{ github.token }}" }
+      - if: steps.gate.outputs.code == '1'
+        run: exit 1</pre></div>
+    <p class="empty">Limits: the repository must already be added to your Blindspot instance and must be public, because the server reads the pull request from GitHub.</p>
+
+    <h2>From any script: one request</h2>
+    <div class="snippet"><button class="ghost" data-copy>Copy</button><pre class="code">curl -s -X POST "$BLINDSPOT_URL/api/gate" \
+  -H 'Content-Type: application/json' \
+  -d '{"pr_url": "https://github.com/FalkorDB/GraphRAG-SDK/pull/335"}'
+# or, without GitHub: -d '{"repo": "repo", "files": ["graphrag_sdk/src/graphrag_sdk/storage/graph_store.py"]}'</pre></div>
+    <p>The response includes <code>verdict</code>, <code>score</code>, <code>percentile</code>, <code>factors</code> (each with its points), <code>companions</code>, <code>reviewers</code>, <code>decisions</code> and a <code>check_id</code> you can open at <code>#check/&lt;id&gt;</code>.</p>
+
+    <h2>In your editor: MCP</h2>
+    <p>The same graph tools (<code>who_knows</code>, <code>impact</code>, <code>why</code>, <code>load_bearing</code>, <code>path_between</code>, <code>suggest_reviewers</code>) are exposed to Claude Desktop, Cursor and other MCP clients.</p>
+    <div class="snippet"><button class="ghost" data-copy>Copy</button><pre class="code">{
+  "mcpServers": {
+    "blindspot": { "command": "python", "args": ["mcp_server.py"], "cwd": "/path/to/blindspot" }
+  }
+}</pre></div>
+  </div>
+</main>
+
+<!-- ================= SAFETY ================= -->
+<main class="page" id="p-safety">
+  <div class="prose">
+    <h1 style="font-family:var(--serif);font-weight:400;font-size:clamp(40px,6vw,64px);line-height:1.05;margin:24px 0 10px">What Blindspot <em style="color:var(--go)">can and can't</em> do.</h1>
+    <p>A review tool earns trust by being clear about its limits. This page is the short version.</p>
+    <h2>Capabilities</h2>
+    <table class="table"><thead><tr><th>Question</th><th>Answer</th></tr></thead><tbody>
+      <tr><td>Reads git history of public repositories</td><td class="yes">Yes, with <code>git log</code> and <code>git ls-tree</code></td></tr>
+      <tr><td>Runs code from the repository</td><td class="no">Never</td></tr>
+      <tr><td>Writes to GitHub or changes your repository</td><td class="no">Never. It is read-only; the gate only shows a verdict.</td></tr>
+      <tr><td>Uses an LLM for the merge-gate score</td><td class="yes">No. Graph queries only.</td></tr>
+      <tr><td>Uses an LLM on the Ask page</td><td>Yes, to pick one of six fixed tools and phrase the answer</td></tr>
+      <tr><td>Lets the model write queries</td><td class="no">Never. Tools are parameterised and file names are resolved against the graph.</td></tr>
+      <tr><td>Calls an unknown file "safe"</td><td class="no">Never. It reports it as unknown.</td></tr>
+      <tr><td>Keeps a record of every verdict</td><td class="yes">Yes: a hash-chained audit log in the graph. It detects edits; it is not a signature.</td></tr>
+    </tbody></table>
+    <h2>What is stored</h2>
+    <p>The repository graph (people, commits, files, co-change edges), one memory graph per Ask user (their questions, answers and a few facts), and a coordination graph recording each agent step. All live in FalkorDB.</p>
+    <h2>Known gaps</h2>
+    <ul>
+      <li><b>Co-change is statistical.</b> It cannot see a dependency that has never changed together. On small or young repositories it is weak: the Proof page shows ×1.2 on a 330-commit repository.</li>
+      <li><b>Verdict thresholds are heuristic.</b> HIGH means riskier than 80% of this repository's own past changes and MEDIUM riskier than 50%. They are not calibrated against real incidents or defects.</li>
+      <li><b>Demo pull requests are already merged,</b> so their own commits are part of the history the gate reads.</li>
+      <li><b>"Decisions" come from commit messages only.</b> Pull request comments and issues are not ingested yet.</li>
+      <li><b>No authentication.</b> Per-IP rate limits protect the costly endpoints (Ask 8/min, add a repository 4/min, gate 60/min) and responses carry basic security headers, but anyone who can reach the site can use it. Do not expose it with an uncapped paid model key.</li>
+      <li><b>GitHub's anonymous API limit</b> (60 requests an hour) applies to pull-request lookups; results are cached for an hour.</li>
+    </ul>
+  </div>
+</main>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <h3 style="margin:0 0 6px;font-family:var(--serif);font-size:22px">Add a public GitHub repository</h3>
+    <p style="color:var(--mute);margin:0 0 12px;font-size:14px">Clones history only (no checkout, no code run) and builds a new graph. Large repos are capped to the latest 2,000 commits.</p>
+    <input id="url" placeholder="https://github.com/owner/name" style="width:100%" aria-label="GitHub URL">
+    <div class="log" id="joblog" aria-live="polite"></div>
+    <div class="row" style="justify-content:flex-end"><button class="ghost" value="cancel">Close</button><button id="ingest" value="x" type="button">Build graph</button></div>
+  </form>
+</dialog>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot">
+      <div><h4>Product</h4><a href="#gate">Merge gate</a><a href="#board">Board</a><a href="#analytics">Analytics</a><a href="#audit">Audit log</a><a href="#ask">Ask</a></div>
+      <div><h4>Run it</h4><a href="#judge">Judge in 90 seconds</a><a href="#integrate">Use it in CI or your editor</a><a href="/api/report?repo_name=repo" download>Download a report</a><a href="#faq">FAQ</a></div>
+      <div><h4>Trust</h4><a href="#proof">Proof</a><a href="#safety">Safety notes</a><a href="#audit">Verify the audit chain</a></div>
+      <div><h4>Built with</h4><a href="https://www.falkordb.com" rel="noopener">FalkorDB</a><a href="https://docs.falkordb.com/cypher/" rel="noopener">Cypher</a><a href="https://modelcontextprotocol.io" rel="noopener">MCP</a></div>
+    </div>
+    <div class="wordmark" aria-hidden="true">Blind<i>spot</i></div>
+    <div class="fine"><span>Built for the WeMakeDevs × FalkorDB Graph Hacks. Tracks: agents that act on connected data, agent memory and coordination, company brain. Built with the assistance of an AI coding assistant (Claude Code).</span>
+      <span class="keys"><kbd>g</kbd><kbd>b</kbd> board · <kbd>g</kbd><kbd>a</kbd> analytics · <kbd>g</kbd><kbd>u</kbd> audit · <kbd>g</kbd><kbd>s</kbd> safety · <kbd>/</kbd> check a PR · <kbd>?</kbd> help · <kbd>esc</kbd> close · v1.0</span></div>
+  </div>
+</footer>
+<button class="helpbtn" id="helpbtn" aria-label="Keyboard shortcuts and help" title="Shortcuts (?)">?</button>
+<dialog id="helpdlg">
+  <form method="dialog">
+    <h3 style="margin:0 0 6px;font-family:var(--serif);font-weight:400;font-size:26px">Keyboard shortcuts</h3>
+    <p style="color:var(--mute);margin:0 0 12px;font-size:14px">Press <kbd>g</kbd> then a letter to jump between pages.</p>
+    <table class="table" style="margin:0"><tbody>
+      <tr><td><kbd>g</kbd> <kbd>h</kbd></td><td>Home</td><td><kbd>g</kbd> <kbd>b</kbd></td><td>Board</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>m</kbd></td><td>Merge gate</td><td><kbd>g</kbd> <kbd>a</kbd></td><td>Analytics</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>u</kbd></td><td>Audit log</td><td><kbd>g</kbd> <kbd>k</kbd></td><td>Ask</td></tr>
+      <tr><td><kbd>g</kbd> <kbd>p</kbd></td><td>Proof</td><td><kbd>g</kbd> <kbd>s</kbd></td><td>Safety</td></tr>
+      <tr><td><kbd>/</kbd></td><td>Check a PR</td><td><kbd>?</kbd></td><td>This help</td></tr>
+    </tbody></table>
+    <div class="row" style="justify-content:flex-end"><button class="ghost" value="close">Close <kbd>esc</kbd></button></div>
+  </form>
+</dialog>
+
+<script src="/static/app.js?v=9"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      falkordb:
+        image: falkordb/falkordb:latest
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install -r requirements.txt pytest
+      - name: Ingest demo repo (history only)
+        run: |
+          git clone --no-checkout https://github.com/FalkorDB/GraphRAG-SDK data/GraphRAG-SDK
+          python ingest.py data/GraphRAG-SDK repo https://github.com/FalkorDB/GraphRAG-SDK
+      - run: pytest -q tests          # grounding guard, resolver, tools, repo isolation, MCP round trip (no LLM calls)
+      - run: python eval.py data/GraphRAG-SDK repo 10   # graph answers vs. ground truth from git itself

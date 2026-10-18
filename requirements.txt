@@ -1,0 +1,6 @@
+falkordb>=1.8.0
+fastapi
+uvicorn[standard]
+litellm
+mcp
+python-dotenv

@@ -1,0 +1,21 @@
+# .github/workflows/blindspot.yml : comment a Blindspot verdict on every PR, fail the check on HIGH.
+# Setup: add a repository variable BLINDSPOT_URL (your deployment); copy integrations/gate_ci.py into the repo.
+name: blindspot-gate
+on: { pull_request: { types: [opened, synchronize, reopened] } }
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    permissions: { pull-requests: write, contents: read }
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        run: |
+          set +e
+          python integrations/gate_ci.py --url "${{ vars.BLINDSPOT_URL }}" --pr "${{ github.event.pull_request.html_url }}" \
+            --fail-on HIGH --markdown comment.md
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+      - if: hashFiles('comment.md') != ''
+        run: gh pr comment "${{ github.event.pull_request.number }}" --body-file comment.md
+        env: { GH_TOKEN: "${{ github.token }}" }
+      - if: steps.gate.outputs.code == '1'
+        run: exit 1
