@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css?v=37">
+<link rel="stylesheet" href="/static/app.css?v=39">
 <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
@@ -194,7 +194,7 @@ RETURN o.path, e.weight</pre>
       <h2>Good <em>questions</em>.</h2>
       <div class="faq">
         <details><summary>Does it use an LLM?</summary><p>The merge gate does not: it is graph queries, so it is fast and gives the same answer twice. The Ask page uses a model only to choose between eleven fixed graph tools and to phrase the result, and an answer that names a file not found in the evidence is withheld.</p></details>
-        <details><summary>How accurate is it?</summary><p>On GraphRAG-SDK the gate puts a deliberately hidden file in its top three companions 35% of the time, against 14% for guessing the most-changed files. On the much smaller falkordb-py it is 20% against 18%. It is a useful signal on a large active repository, not proof of anything. The Proof page shows the live numbers.</p></details>
+        <details><summary>How accurate is it?</summary><p>On GraphRAG-SDK the gate puts a deliberately hidden file in its top three companions 35% of the time, against about 14 to 15% for guessing the most-changed files. On the much smaller falkordb-py it is 20% against 18%. It is a useful signal on a large active repository, not proof of anything. The Proof page shows the live numbers.</p></details>
         <details><summary>Is it safe to point at my repository?</summary><p>It reads public repositories through <code>git log</code> and never executes their code. This demo has no authentication, so do not use it for private code.</p></details>
         <details><summary>What does it need to run?</summary><p>FalkorDB (one Docker command) and git. A model API key is needed only for the Ask page. The merge gate and the recorded run work without one.</p></details>
         <details><summary>What can't it do?</summary><p>It is not a static analyser, so it cannot see imports that have never changed together. It does not read PR comments or issues yet. New files have no history, so they are reported as unknown rather than safe.</p></details>
@@ -431,6 +431,6 @@ jobs:
   </form>
 </dialog>
 
-<script src="/static/app.js?v=37"></script>
+<script src="/static/app.js?v=39"></script>
 </body>
 </html>

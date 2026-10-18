@@ -507,3 +507,9 @@ function onRepoChange() { renderExamples(); askLoaded = false; $('gresult').inne
 $('repo').onchange = onRepoChange;
 initHow();
 (async () => { await loadRepos(); onRepoChange(); })();
+
+/* ---------- optional ?s=<css selector> : open a page already scrolled to an element (used for screenshots and shareable deep links) ---------- */
+(() => {
+  const s = new URLSearchParams(location.search).get('s'); if (!s) return;
+  setTimeout(() => { try { document.documentElement.style.scrollBehavior = 'auto'; document.querySelector(s)?.scrollIntoView({ block: 'start' }); window.scrollBy(0, -96); } catch (e) { /* bad selector: ignore */ } }, 3500);
+})();

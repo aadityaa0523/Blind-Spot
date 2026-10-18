@@ -43,7 +43,7 @@ gate's top-3 "probably forgotten" files. Baseline: the 3 most-changed files so f
 
 | Repo | Trials | Gate recall@3 | Baseline | Lift |
 |---|---|---|---|---|
-| FalkorDB/GraphRAG-SDK (513 commits) | 783 | 35% | 14% | ×2.5 |
+| FalkorDB/GraphRAG-SDK (513 commits) | 783 | 35% | 14-15% | ×2.4-2.5 |
 | FalkorDB/falkordb-py (330 commits) | 113 | 20% | 18% | ×1.2 |
 
 The lift moves by about a tenth between ingests (it read ×2.4 on an earlier run) because ties between equally-changed files are ordered arbitrarily.
