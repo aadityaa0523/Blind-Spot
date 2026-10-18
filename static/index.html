@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css?v=26">
+<link rel="stylesheet" href="/static/app.css?v=32">
 <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
@@ -250,6 +250,9 @@ RETURN o.path, e.weight</pre>
   <div class="card"><h2>Walk-forward backtest <span class="tiles" id="tiles"></span></h2>
     <div class="stats" id="proofstats"><div class="empty">Running the backtest…</div></div>
     <p class="empty" id="proofnote" style="margin:14px 0 0"></p></div>
+  <div class="card"><h2>Tenant isolation at scale <span class="tiles" id="benchtag"></span></h2>
+    <div class="stats" id="benchstats"><div class="empty">Loading…</div></div>
+    <p class="empty" id="benchnote" style="margin:14px 0 0"></p></div>
   <div class="cols">
     <div class="card"><h2>How the score is made</h2>
       <ul class="clean"><li><b>Load-bearing</b> (35): PageRank over the co-change graph. Docs and lockfiles are ignored.</li>
@@ -289,6 +292,13 @@ RETURN o.path, e.weight</pre>
     <div class="card"><h2>Files in HIGH or MEDIUM checks</h2><div id="anflagged"></div></div>
     <div class="card"><h2>Recommended reviewers</h2><div id="anrev"></div></div>
     <div class="card"><h2>Checks per repository</h2><div id="anrepos"></div></div>
+  </div>
+  <div class="pagehead" style="margin-top:36px"><div><h2 class="sec">Knowledge risk</h2><p>Who holds the knowledge in <b id="knrepo">this repository</b>, and which files always change as a unit. Computed from the graph.</p></div>
+    <div class="row" style="margin:0"><button class="ghost" id="co-copy">Copy suggested CODEOWNERS</button><button class="ghost" id="co-dl">Download</button></div></div>
+  <div class="cols">
+    <div class="card"><h2>Bus factor by module</h2><div id="knmods"><div class="empty">Loading…</div></div></div>
+    <div class="card"><h2>Files one person wrote almost alone</h2><div id="knfiles"><div class="empty">Loading…</div></div></div>
+    <div class="card"><h2>Hidden modules <span class="badge">label propagation</span></h2><div id="knclusters"><div class="empty">Loading…</div></div></div>
   </div>
 </main>
 
@@ -419,6 +429,6 @@ jobs:
   </form>
 </dialog>
 
-<script src="/static/app.js?v=25"></script>
+<script src="/static/app.js?v=32"></script>
 </body>
 </html>

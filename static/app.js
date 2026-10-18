@@ -260,6 +260,7 @@ $('user').onchange = loadMemory;
 
 /* ---------- proof ---------- */
 async function loadProof() {
+  loadBench();
   const name = $('repo').value; if (!name) return;
   const [s, p] = await Promise.all([fetch('/api/stats?repo_name=' + name).then(r => r.json()), fetch('/api/proof?repo_name=' + name).then(r => r.json())]);
   $('tiles').innerHTML = ['nodes', 'edges', 'commits', 'files', 'people'].map(k => `<span class="tile"><b>${s[k]}</b> ${k}</span>`).join('');
@@ -352,6 +353,7 @@ $('boardfilters').onclick = e => {
 
 /* ---------- analytics ---------- */
 async function loadAnalytics() {
+  loadKnowledge();
   const a = await fetch('/api/analytics').then(r => r.json());
   if (!a.total) { $('anstats').innerHTML = '<div class="empty">No checks yet. Run one on the Merge gate page.</div>'; return; }
   const v = a.verdicts || {}, tot = a.total;
@@ -455,6 +457,30 @@ async function fillHow() {  // the first preview shows the real size of the demo
     const s = await fetch('/api/stats?repo_name=repo').then(r => r.json());
     for (const [cls, v] of [['.js-commits', s.commits], ['.js-files', s.files], ['.js-people', s.people]]) document.querySelectorAll(cls).forEach(e => { e.textContent = v; });
   } catch (e) { /* keep the static numbers */ }
+}
+
+/* ---------- knowledge risk, hidden modules, tenant benchmark ---------- */
+let codeowners = '';
+async function loadKnowledge() {
+  const name = $('repo').value || 'repo'; $('knrepo').textContent = repoLabel(name);
+  try {
+    const [k, cl] = await Promise.all([fetch('/api/knowledge?repo_name=' + name).then(r => r.json()), fetch('/api/clusters?repo_name=' + name).then(r => r.json())]);
+    codeowners = k.codeowners;
+    $('knmods').innerHTML = k.modules.length ? k.modules.map(m => `<div class="kn-row"><span class="mono">${esc(m.module)}</span><span><b class="${m.bus_factor === 1 ? 'kn-bus1' : ''}">bus factor ${m.bus_factor}</b> · ${m.people} people · ${esc(m.owners[0].name)} ${Math.round(m.owners[0].share * 100)}%</span></div>`).join('') : '<div class="empty">No module history.</div>';
+    $('knfiles').innerHTML = k.single_owner_files.length ? k.single_owner_files.slice(0, 8).map(f => `<div class="kn-row"><span class="mono">${esc(short(f.path))}</span><span>${esc(f.owner)} · ${Math.round(f.share * 100)}% of ${f.commits} commits</span></div>`).join('') : '<div class="empty">No file is dominated by one person.</div>';
+    $('knclusters').innerHTML = cl.length ? cl.slice(0, 5).map(c => `<div class="kn-cluster"><div class="head"><b>${c.size} files</b> · ${c.cross_folder ? 'spans ' + c.modules.length + ' folders' : 'one folder'}</div><code>${c.files.slice(0, 5).map(f => esc(base(f))).join(', ')}${c.files.length > 5 ? ' +' + (c.files.length - 5) + ' more' : ''}</code></div>`).join('') : '<div class="empty">No tight clusters found.</div>';
+  } catch (e) { for (const id of ['knmods', 'knfiles', 'knclusters']) $(id).innerHTML = '<div class="empty">Could not load: ' + esc(e.message) + '</div>'; }
+}
+$('co-copy').onclick = () => codeowners && copyText(codeowners, $('co-copy'), 'Copied');
+$('co-dl').onclick = () => { if (!codeowners) return; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([codeowners], { type: 'text/plain' })); a.download = 'CODEOWNERS'; a.click(); URL.revokeObjectURL(a.href); };
+async function loadBench() {
+  try {
+    const b = await fetch('/api/bench').then(r => { if (!r.ok) throw new Error('not run yet'); return r.json(); });
+    $('benchstats').innerHTML = [[b.graphs_in_one_instance.toLocaleString(), 'isolated memory graphs in one instance'], [b.p50_ms + ' ms', 'median read'], [b.p95_ms + ' ms', '95th percentile'],
+      [b.reads_per_second.toLocaleString(), 'reads per second, ' + b.workers + ' clients'], [b.isolation_violations, 'isolation violations in ' + b.reads.toLocaleString() + ' reads']]
+      .map(([n, l]) => `<div class="stat"><b>${esc(n)}</b><span>${esc(l)}</span></div>`).join('');
+    $('benchnote').textContent = `Each tenant is its own FalkorDB graph holding a unique token; every read must return only its own. Measured ${b.measured} on one machine (${b.machine}), so treat it as a sanity check, not a capacity claim. Reproduce with python bench_tenants.py.`;
+  } catch (e) { $('benchstats').innerHTML = '<div class="empty">Run <code>python bench_tenants.py</code> to produce this.</div>'; }
 }
 
 /* ---------- boot ---------- */

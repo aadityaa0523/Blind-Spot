@@ -1,0 +1,14 @@
+{
+ "tenants": 2000,
+ "graphs_in_one_instance": 2000,
+ "reads": 10000,
+ "workers": 32,
+ "seed_seconds": 2.1,
+ "p50_ms": 15.7,
+ "p95_ms": 29.9,
+ "p99_ms": 38.6,
+ "reads_per_second": 1874,
+ "isolation_violations": 0,
+ "measured": "2026-10-18",
+ "machine": "Windows AMD64, FalkorDB in Docker, Python client"
+}

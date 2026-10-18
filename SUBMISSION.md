@@ -11,8 +11,11 @@
    `MATCH (p:Person)-[:AUTHORED]->(c:Commit)-[:TOUCHED]->(f:File) RETURN p,c,f LIMIT 60`.
 3b. **1:25 Board and audit (20s).** Board page: "every verdict is kept"; open one for its permalink and **Copy as PR comment**. Audit page: **Verify the chain**,
    "each record carries the hash of the one before it, so an edit is detectable."
+3c. **1:45 Company brain (20s).** Analytics page, **Knowledge risk**: "nearly every module has a bus factor of 1, one person wrote it"; show the hidden modules
+   (files across docs, examples and tests that always change together) and press **Copy suggested CODEOWNERS**.
 4. **1:35 Proof (25s).** Proof tab: "walk-forward backtest, history only: 35% of forgotten files caught, vs 14% for guessing, and
    we also say it is weak on small repos."
+4b. **Proof, second card (10s).** "2,000 isolated memory graphs in one FalkorDB, median 15.7 ms, zero cross-tenant leaks", and say it is one machine, a sanity check.
 5. **2:00 Agents and memory (35s).** Ask page, **Watch a recorded run** (or ask live): the crew hands off through the graph, each
    graph query takes milliseconds, the answer is marked *grounded*. Replay a second run: "Last time you asked about..." comes from
    that user's own memory graph.
@@ -38,7 +41,7 @@ same answer twice.
 
 **Does it work?** I tested it the hard way: replay the history commit by commit, hide one file from each commit, and ask
 the gate to find it using only earlier history. On FalkorDB's GraphRAG-SDK it finds the hidden file in its top three 35% of
-the time versus 14% for guessing the most-changed files (x2.4). On the much smaller falkordb-py it is 20% versus 18%, barely
+the time versus 14% for guessing the most-changed files (about x2.5). On the much smaller falkordb-py it is 20% versus 18%, barely
 better. So: useful on a big active repo, weak on a small one, and the app says so on its Proof page. My first version of
 this test let the gate see future commits and looked better (48%); I threw it away.
 

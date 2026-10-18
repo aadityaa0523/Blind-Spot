@@ -400,3 +400,11 @@ button.ghost:hover, .btn.ghost:hover { background:var(--active); }
 .mg-list code { font-family:var(--mono); font-size:13px; color:var(--text-2); } .mg-list span { margin:0 6px; } .mg-list b { font-family:var(--mono); color:var(--warn); margin-left:8px; }
 @media (max-width:900px) { .hiw-inline .mini-graph { display:none; } .hiw-inline .mg-list { display:block; } }
 @media (max-width:900px) { .hiw-inline .legend { display:none; } }
+
+.pagehead h2.sec { font-family:var(--serif); font-weight:400; font-size:clamp(28px,3.4vw,38px); letter-spacing:-.4px; margin:0 0 6px; text-transform:none; color:var(--text); }
+.kn-row { display:flex; justify-content:space-between; gap:12px; padding:9px 0; font-size:14px; } .kn-row + .kn-row { border-top:1px solid var(--line); }
+.kn-row .mono { color:var(--text); } .kn-row span:last-child { color:var(--mute); font-size:13px; text-align:right; }
+.kn-bus1 { color:var(--risk) !important; font-weight:600; }
+.kn-cluster { padding:10px 0; } .kn-cluster + .kn-cluster { border-top:1px solid var(--line); }
+.kn-cluster .head { font-size:14px; margin-bottom:4px; } .kn-cluster code { font-family:var(--mono); font-size:12.5px; color:var(--text-2); overflow-wrap:anywhere; }
+.kn-row { flex-direction:column; gap:2px; } .kn-row span:last-child { text-align:left; } .kn-row .mono { overflow-wrap:anywhere; word-break:normal; }

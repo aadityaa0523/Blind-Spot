@@ -43,13 +43,25 @@ gate's top-3 "probably forgotten" files. Baseline: the 3 most-changed files so f
 
 | Repo | Trials | Gate recall@3 | Baseline | Lift |
 |---|---|---|---|---|
-| FalkorDB/GraphRAG-SDK (513 commits) | 783 | 35% | 14% | ×2.4 |
+| FalkorDB/GraphRAG-SDK (513 commits) | 783 | 35% | 14% | ×2.5 |
 | FalkorDB/falkordb-py (330 commits) | 113 | 20% | 18% | ×1.2 |
+
+The lift moves by about a tenth between ingests (it read ×2.4 on an earlier run) because ties between equally-changed files are ordered arbitrarily.
 
 Read this honestly: the signal is useful on a large, active repo and **weak on a small one**. Trials from the same commit
 are not independent, and tests/docs co-change often, which helps. An earlier leave-one-out version of this test gave a
 higher number because it let the gate see future commits; it was replaced by the walk-forward version above.
 `eval.py` separately checks that graph answers equal ground truth from `git` itself (top expert and co-change counts: 10/10 and 10/10 on both repos).
+
+## More from the graph
+
+* **Knowledge risk** (Analytics page): bus factor per module (fewest people who wrote half its history), files one person wrote almost alone,
+  and a suggested `CODEOWNERS` file (names, to be replaced by GitHub handles). On GraphRAG-SDK nearly every module has a bus factor of 1.
+* **Hidden modules** (Analytics page): communities in the co-change graph from FalkorDB's `algo.labelPropagation`. The giant component is skipped;
+  what remains are groups of files that change as a unit, often across folders (docs + examples + tests).
+* **Tenant isolation at scale** (Proof page): `python bench_tenants.py` creates thousands of per-user memory graphs in one FalkorDB, reads them in parallel and
+  checks every answer contains only its own tenant's data. Last run: 2,000 graphs, 10,000 reads, median 15.7 ms, p95 29.9 ms, 0 isolation violations
+  (one machine, Python client; a sanity check, not a capacity claim).
 
 ## Why a graph
 

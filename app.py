@@ -16,6 +16,7 @@ from pydantic import BaseModel
 import checks
 import gate
 import ingest
+import insights
 import memory
 from agent import ask_stream
 from dotenv import load_dotenv
@@ -61,6 +62,7 @@ GATE_CACHE: dict[str, tuple[float, dict]] = {}  # pr_url -> (expires_at, respons
 GATE_TTL = 3600
 METRICS = dict(gate_calls=0, gate_ms_total=0.0, started=time.time())
 PROOF_CACHE: dict[str, dict] = {}
+CLUSTER_CACHE: dict[str, list] = {}  # label propagation can vary between runs, so keep one answer per repo until re-ingest
 JOB_LOCK = threading.Lock()  # one ingest at a time: keeps the demo box responsive
 
 
@@ -120,6 +122,7 @@ def _run_job(name, url):
                        check=True, capture_output=True, timeout=300)
         ingest.main(str(dest), name=name, url=url, progress=log)
         gate._BASE.pop(name, None)
+        CLUSTER_CACHE.pop(name, None)
         if name == "repo":
             threading.Thread(target=_warm_baselines, daemon=True).start()
         job["status"] = "done"
@@ -242,6 +245,30 @@ def api_report(repo_name: str = "repo"):
         lines += ["", "### Recommended reviewers", ""] + [f"- {r['name']}: {r['checks']} checks" for r in an["reviewer_load"]]
     lines += ["", "_Generated from the FalkorDB graph; no LLM involved._", ""]
     return PlainTextResponse(chr(10).join(lines), media_type="text/markdown")
+
+
+@app.get("/api/knowledge")
+def api_knowledge(repo_name: str = "repo"):
+    """Bus factor per module, files with one dominant author, and a suggested CODEOWNERS file."""
+    return insights.knowledge(repo(valid_repo(repo_name)))
+
+
+@app.get("/api/clusters")
+def api_clusters(repo_name: str = "repo"):
+    """Hidden modules: communities in the co-change graph (FalkorDB label propagation)."""
+    name = valid_repo(repo_name)
+    if name not in CLUSTER_CACHE:
+        CLUSTER_CACHE[name] = insights.clusters(repo(name))
+    return CLUSTER_CACHE[name]
+
+
+@app.get("/api/bench")
+def api_bench():
+    """Last result of bench_tenants.py (many isolated memory graphs read in parallel)."""
+    try:
+        return json.load(open("bench_results.json", encoding="utf-8"))
+    except Exception:
+        raise HTTPException(404, "no benchmark has been run yet: python bench_tenants.py")
 
 
 @app.get("/api/summary")
