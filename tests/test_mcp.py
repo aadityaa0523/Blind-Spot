@@ -1,6 +1,7 @@
 """Spawn the MCP server over stdio and call real tools against the seeded `repo` graph (needs FalkorDB + ingest)."""
 import asyncio
 import json
+import os
 import sys
 
 from mcp import ClientSession, StdioServerParameters
@@ -12,7 +13,7 @@ async def _call(session, name, args):
 
 
 async def _run():
-    params = StdioServerParameters(command=sys.executable, args=["mcp_server.py"])
+    params = StdioServerParameters(command=sys.executable, args=["mcp_server.py"], env=dict(os.environ))  # the MCP client passes only a minimal env by default; the child needs FALKORDB_*
     async with stdio_client(params) as (r, w), ClientSession(r, w) as s:
         await s.initialize()
         names = {t.name for t in (await s.list_tools()).tools}
