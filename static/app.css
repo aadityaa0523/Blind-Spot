@@ -395,8 +395,8 @@ button.ghost:hover, .btn.ghost:hover { background:var(--active); }
 .hiw-score .big { white-space:nowrap; flex:none; } .hiw-score .big small { display:inline-block; }
 
 .mg-list { display:none; list-style:none; margin:0 0 14px; padding:0; }
-.mg-list li { padding:10px 0; border-top:1px solid var(--line); font-size:13.5px; color:var(--mute); line-height:1.7; overflow-wrap:anywhere; }
-.mg-list li:first-child { border-top:0; padding-top:0; }
+.mg-list li { padding:10px 0; font-size:13.5px; color:var(--mute); line-height:1.7; overflow-wrap:anywhere; }
+.mg-list li + li { border-top:1px solid var(--line); }
 .mg-list code { font-family:var(--mono); font-size:13px; color:var(--text-2); } .mg-list span { margin:0 6px; } .mg-list b { font-family:var(--mono); color:var(--warn); margin-left:8px; }
 @media (max-width:900px) { .hiw-inline .mini-graph { display:none; } .hiw-inline .mg-list { display:block; } }
 @media (max-width:900px) { .hiw-inline .legend { display:none; } }

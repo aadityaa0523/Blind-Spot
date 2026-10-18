@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css?v=25">
+<link rel="stylesheet" href="/static/app.css?v=26">
 <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
@@ -135,13 +135,13 @@ RETURN o.path, e.weight</pre>
         </div>
         <div class="hiw-steps">
           <article class="hiw-step"><div class="hiw-inline"></div><span class="n">01 · READ</span><h3>Read the history</h3>
-            <p>Only <code>git log</code> and <code>git ls-tree</code>. No checkout, and no code from the repository is ever run. Merge commits are followed, so every commit knows which pull request it belonged to.</p>
+            <p>Blindspot reads history with <code>git log</code> and <code>git ls-tree</code>, never checking out or running any code from the repository. It follows merge commits, so every commit knows which pull request it belonged to.</p>
             <div class="receipt">ingest.py · tests/test_core.py::test_resolver_never_guesses</div></article>
           <article class="hiw-step"><div class="hiw-inline"></div><span class="n">02 · WALK</span><h3>Walk the graph</h3>
             <p>People, commits and files become nodes. Files that change together get a weighted edge, so "what usually travels with this file?" is a one-hop query, and PageRank finds the files everything leans on.</p>
             <div class="receipt">tools.py · gate.py · tests/test_core.py::test_tools_return_graph_paths</div></article>
           <article class="hiw-step"><div class="hiw-inline"></div><span class="n">03 · EXPLAIN</span><h3>Explain every point</h3>
-            <p>Load-bearing files, missing companions, module spread and size add up to a score, each shown next to its reason. The verdict compares that score with the repository's own past changes. No model is involved.</p>
+            <p>Load-bearing files, missing companions, module spread and size add up to a score, each shown next to its reason. The verdict compares that score with the repository's own past changes, and the whole calculation runs without a language model.</p>
             <div class="receipt">gate.py · backtest.py · tests/test_core.py::test_gate_explains_its_score_and_never_guesses</div></article>
         </div>
       </div>
@@ -229,7 +229,7 @@ RETURN o.path, e.weight</pre>
         <div class="row" style="margin:0 0 10px"><label for="user" style="color:var(--mute)">You are</label>
           <input id="user" value="alice" style="max-width:130px"><span style="color:var(--mute);font-size:13px">each user gets a separate memory graph</span></div>
         <textarea id="q" aria-label="Question" placeholder="Click a node in the graph, or ask: I'm changing X, what else might break and who should review?"></textarea>
-        <div class="row"><button id="go">Ask</button><button class="ghost" id="replay" title="Replays a real run recorded earlier. No live model call.">▶ Watch a recorded run</button><span class="chips" id="chips"></span></div>
+        <div class="row"><button id="go">Ask</button><button class="ghost" id="replay" title="Replays a real run recorded earlier, so it makes no live model call.">▶ Watch a recorded run</button><span class="chips" id="chips"></span></div>
       </div>
       <div class="card"><h2>Agent crew <span id="gstate"></span></h2><div class="trace" id="trace"><div class="status">Ask a question to watch the agents hand off through the graph.</div></div></div>
       <div class="card"><h2>Answer</h2><div id="answer" class="empty">Nothing yet.</div></div>
