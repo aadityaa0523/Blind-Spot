@@ -337,8 +337,6 @@ button.ghost:hover, .btn.ghost:hover { background:var(--active); }
 .hero-home { position:relative; isolation:isolate; overflow:hidden; }
 .hero-home::before { content:""; position:absolute; inset:0; z-index:-1; background-image:linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size:56px 56px;
   -webkit-mask-image:radial-gradient(ellipse 70% 62% at 50% 0%, #000 25%, transparent 78%); mask-image:radial-gradient(ellipse 70% 62% at 50% 0%, #000 25%, transparent 78%); }
-.hero-home h1 { background:linear-gradient(180deg, var(--text) 40%, var(--soft) 130%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-.hero-home h1 em { -webkit-text-fill-color:var(--go); }
 
 @media (prefers-reduced-motion:reduce) { .page.on { animation:none; } }
 
