@@ -156,8 +156,8 @@ groups that cross folders, for example documentation pages, an example script an
 ## Try it
 
 - Code (MIT): https://github.com/aadityaa0523/Blind-Spot
-- Demo video: *[add your video link]*
-- Live app: *[add your deployment link, if you have one]*
+- Demo video: https://youtu.be/WgIX5cI3trc
+- Live app:https://blind-spot-1.onrender.com
 
 Built for the WeMakeDevs × FalkorDB Graph Hacks (Tracks 1, 2 and 3), using FalkorDB for the repository graph, the per-user memory graphs,
 the audit trail and the agent coordination. Built with the assistance of an AI coding assistant; I reviewed, ran and am responsible for the code.
