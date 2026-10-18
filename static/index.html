@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css?v=33">
+<link rel="stylesheet" href="/static/app.css?v=35">
 <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
@@ -169,7 +169,7 @@ RETURN o.path, e.weight</pre>
       <div class="trust">
         <div><h3>Evidence before the model</h3><p>The gate never asks a model for a score. It walks the graph, then shows you the path it took.</p></div>
         <div><h3>Honest numbers</h3><p>A walk-forward backtest, shown on the Proof page, including the small repository where the signal is weak.</p></div>
-        <div><h3>Fixed tools, no generated queries</h3><p>The agents choose between nine parameterised tools. Model output is never concatenated into a query.</p></div>
+        <div><h3>Fixed tools, no generated queries</h3><p>The agents choose between eleven parameterised tools. Model output is never concatenated into a query.</p></div>
         <div><h3>Nothing is executed</h3><p>History is read, never run. Unknown files are reported as unknown, never as safe.</p></div>
       </div>
       <p style="margin-top:30px"><a class="btn ghost" href="#safety">Read the safety notes</a></p>
@@ -193,7 +193,7 @@ RETURN o.path, e.weight</pre>
     <div class="wrap">
       <h2>Good <em>questions</em>.</h2>
       <div class="faq">
-        <details><summary>Does it use an LLM?</summary><p>The merge gate does not: it is graph queries, so it is fast and gives the same answer twice. The Ask page uses a model only to choose between nine fixed graph tools and to phrase the result, and an answer that names a file not found in the evidence is withheld.</p></details>
+        <details><summary>Does it use an LLM?</summary><p>The merge gate does not: it is graph queries, so it is fast and gives the same answer twice. The Ask page uses a model only to choose between eleven fixed graph tools and to phrase the result, and an answer that names a file not found in the evidence is withheld.</p></details>
         <details><summary>How accurate is it?</summary><p>On GraphRAG-SDK the gate puts a deliberately hidden file in its top three companions 35% of the time, against 14% for guessing the most-changed files. On the much smaller falkordb-py it is 20% against 18%. It is a useful signal on a large active repository, not proof of anything. The Proof page shows the live numbers.</p></details>
         <details><summary>Is it safe to point at my repository?</summary><p>It reads public repositories through <code>git log</code> and never executes their code. This demo has no authentication, so do not use it for private code.</p></details>
         <details><summary>What does it need to run?</summary><p>FalkorDB (one Docker command) and git. A model API key is needed only for the Ask page. The merge gate and the recorded run work without one.</p></details>
@@ -262,7 +262,7 @@ RETURN o.path, e.weight</pre>
         <li>Every point is shown next to its reason. There is no hidden model score.</li></ul></div>
     <div class="card"><h2>What the AI can and can't do</h2>
       <ul class="clean"><li>The gate itself uses <b>no LLM</b>: graph queries only, so it is fast and repeatable.</li>
-        <li>The Ask page's model picks from <b>nine fixed, parameterised tools</b>. It never writes Cypher.</li>
+        <li>The Ask page's model picks from <b>eleven fixed, parameterised tools</b>. It never writes Cypher.</li>
         <li>Answers may only name files found in the evidence, or they are withheld.</li>
         <li>History is read with <code>git log</code>; no repository code is ever run.</li></ul></div>
     <div class="card"><h2>Known gaps (we'd rather say so)</h2>
@@ -278,6 +278,8 @@ RETURN o.path, e.weight</pre>
   <div class="pagehead"><div><h1>Gate <em>board</em></h1><p>Every pull request the gate has read, newest first. Click one to open its full verdict.</p></div>
     <div class="chipbar" id="boardfilters" role="group" aria-label="Filter by verdict">
       <button class="ghost on" data-v="">All</button><button class="ghost" data-v="HIGH">High</button><button class="ghost" data-v="MEDIUM">Medium</button><button class="ghost" data-v="LOW">Low</button></div></div>
+  <div class="card" id="actionsbox"><h2>Agent actions <span class="badge">a person approves, nothing is sent anywhere</span></h2>
+    <div id="actionslist"><div class="empty">Loading…</div></div></div>
   <div class="boardgrid" id="boardlist"><div class="empty">Loading checks…</div></div>
 </main>
 
@@ -368,7 +370,7 @@ jobs:
       <tr><td>Runs code from the repository</td><td class="no">Never</td></tr>
       <tr><td>Writes to GitHub or changes your repository</td><td class="no">Never. It is read-only; the gate only shows a verdict.</td></tr>
       <tr><td>Uses an LLM for the merge-gate score</td><td class="yes">No. Graph queries only.</td></tr>
-      <tr><td>Uses an LLM on the Ask page</td><td>Yes, to pick one of nine fixed tools and phrase the answer</td></tr>
+      <tr><td>Uses an LLM on the Ask page</td><td>Yes, to pick one of eleven fixed tools and phrase the answer</td></tr>
       <tr><td>Lets the model write queries</td><td class="no">Never. Tools are parameterised and file names are resolved against the graph.</td></tr>
       <tr><td>Calls an unknown file "safe"</td><td class="no">Never. It reports it as unknown.</td></tr>
       <tr><td>Keeps a record of every verdict</td><td class="yes">Yes: a hash-chained audit log in the graph. It detects edits; it is not a signature.</td></tr>
@@ -429,6 +431,6 @@ jobs:
   </form>
 </dialog>
 
-<script src="/static/app.js?v=33"></script>
+<script src="/static/app.js?v=35"></script>
 </body>
 </html>

@@ -16,6 +16,7 @@
 4. **1:35 Proof (25s).** Proof tab: "walk-forward backtest, history only: 35% of forgotten files caught, vs 14% for guessing, and
    we also say it is weak on small repos."
 4b. **Proof, second card (10s).** "2,000 isolated memory graphs in one FalkorDB, median 15.7 ms, zero cross-tenant leaks", and say it is one machine, a sanity check.
+4c. **Agent acts (25s).** Board page, **Agent actions**: "the agent judged this change HIGH risk from the graph, chose reviewers from who actually wrote these files, and queued a review request. It can only queue; I approve." Press **Approve**.
 5. **2:00 Agents and memory (35s).** Ask page, **Watch a recorded run** (or ask live): the crew hands off through the graph, each
    graph query takes milliseconds, the answer is marked *grounded*. Replay a second run: "Last time you asked about..." comes from
    that user's own memory graph.
@@ -56,7 +57,7 @@ blast-radius, PageRank and shortest-path queries meaningful.
 
 **Tools, not generated Cypher**
 
-The agent has nine fixed tools (`who_knows`, `impact`, `why`, `load_bearing`, `path_between`, `suggest_reviewers`, `who_knows_topic`, `bus_factor`, `hidden_modules`),
+The agent has eleven fixed tools (`who_knows`, `impact`, `why`, `load_bearing`, `path_between`, `suggest_reviewers`, `who_knows_topic`, `bus_factor`, `hidden_modules`, `gate_change`, `request_review`),
 each a parameterised query I wrote. The model picks tools and fills typed arguments. It never writes a query, so
 there is nothing to inject, and every name is resolved against the graph first. If it can't find a file, it says so.
 

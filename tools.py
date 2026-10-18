@@ -146,7 +146,30 @@ def hidden_modules():
     return {"ok": True, "data": {"clusters": cl}, "path": path}
 
 
-TOOLS = {f.__name__: f for f in (who_knows, impact, why, load_bearing, path_between, suggest_reviewers, who_knows_topic, bus_factor, hidden_modules)}
+def gate_change(files: list[str]):
+    """Risk verdict for a set of changed files, relative to this repository's own history (the same engine as the Merge gate)."""
+    import gate
+    out = gate.analyze([f for f in files if f][:60], base=gate.baseline(CURRENT.get()))
+    return {"ok": True, "data": {k: out.get(k) for k in ("verdict", "score", "percentile", "summary")} | {"companions": out["companions"][:3], "reviewers": out["reviewers"][:3]},
+            "path": out["path"][:8]}
+
+
+def request_review(files: list[str], reason: str = ""):
+    """ACTION: queue a review request for a risky change. It is only queued: a person approves or dismisses it on the Board."""
+    import actions
+    import gate
+    out = gate.analyze([f for f in files if f][:60], base=gate.baseline(CURRENT.get()))
+    if out["verdict"] == "UNKNOWN":
+        return {"ok": False, "data": {"error": "none of these files are in the graph, so there is nothing to judge"}, "path": []}
+    if out["verdict"] == "LOW":
+        return {"ok": True, "data": {"queued": False, "verdict": "LOW", "note": "Low risk compared with this repository's past changes: no review request needed."}, "path": []}
+    people = [r["person"] for r in out["reviewers"]]
+    aid = actions.create(CURRENT.get(), "review_request", out["verdict"], out["score"], out["known"], people, reason)
+    return {"ok": True, "data": {"queued": True, "action_id": aid, "status": "pending human approval on the Board", "verdict": out["verdict"], "score": out["score"],
+                                 "reviewers": people}, "path": out["path"][:8]}
+
+
+TOOLS = {f.__name__: f for f in (who_knows, impact, why, load_bearing, path_between, suggest_reviewers, who_knows_topic, bus_factor, hidden_modules, gate_change, request_review)}
 
 SCHEMAS = [
     {"type": "function", "function": {"name": "who_knows", "description": "Top experts for a file by commit history.",
@@ -167,6 +190,10 @@ SCHEMAS = [
         "parameters": {"type": "object", "properties": {"module": {"type": "string"}}}}},
     {"type": "function", "function": {"name": "hidden_modules", "description": "Communities in the co-change graph: groups of files that change as a unit, often across folders.",
         "parameters": {"type": "object", "properties": {}}}},
+    {"type": "function", "function": {"name": "gate_change", "description": "Risk verdict (LOW/MEDIUM/HIGH, relative to this repository's history) for a set of changed files, with missing companion files and reviewers.",
+        "parameters": {"type": "object", "properties": {"files": {"type": "array", "items": {"type": "string"}}}, "required": ["files"]}}},
+    {"type": "function", "function": {"name": "request_review", "description": "ACTION. For a MEDIUM or HIGH risk change, queue a review request with graph-chosen reviewers. It is only queued for human approval; never say anyone was contacted.",
+        "parameters": {"type": "object", "properties": {"files": {"type": "array", "items": {"type": "string"}}, "reason": {"type": "string"}}, "required": ["files"]}}},
 ]
 
 

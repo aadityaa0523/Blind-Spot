@@ -340,6 +340,7 @@ function prComment(d) {
 /* ---------- board ---------- */
 let boardV = '';
 async function loadBoard() {
+  loadActions();
   const list = await fetch('/api/checks?limit=60' + (boardV ? '&verdict=' + boardV : '')).then(r => r.json());
   $('boardlist').innerHTML = list.length ? list.map(c => `<a class="bcard" href="#check/${esc(c.id)}"><div class="top"><span class="tag ${esc(c.verdict)}">${esc(c.verdict)}</span><b>${c.score ?? '?'}</b></div>
       <div class="t">${esc(c.pr_title || c.n_files + ' files, pasted')}</div>
@@ -482,6 +483,23 @@ async function loadBench() {
     $('benchnote').textContent = `Each tenant is its own FalkorDB graph holding a unique token; every read must return only its own. Measured ${b.measured} on one machine (${b.machine}), so treat it as a sanity check, not a capacity claim. Reproduce with python bench_tenants.py.`;
   } catch (e) { $('benchstats').innerHTML = '<div class="empty">Run <code>python bench_tenants.py</code> to produce this.</div>'; }
 }
+
+/* ---------- agent actions awaiting a human decision ---------- */
+async function loadActions() {
+  try {
+    const list = await fetch('/api/actions').then(r => r.json());
+    $('actionslist').innerHTML = list.length ? list.slice(0, 8).map(a => `<div class="act"><div class="top"><span class="badge ${esc(a.status)}">${esc(a.status)}</span><span class="tag ${esc(a.verdict)}">${esc(a.verdict)}</span><b>${a.score ?? '?'}</b><span class="meta">${esc(repoLabel(a.repo))} · ${a.files.length} files · ${esc(ago(a.ts))}</span></div>
+        <div class="why">Review request for <code>${a.files.slice(0, 3).map(f => esc(base(f))).join(', ')}${a.files.length > 3 ? ' +' + (a.files.length - 3) : ''}</code>${a.reason ? ' · ' + esc(a.reason) : ''}</div>
+        <div class="meta">Reviewers chosen from the graph: ${a.reviewers.length ? a.reviewers.map(esc).join(', ') : 'none found'}</div>
+        ${a.status === 'pending' ? `<div class="btns"><button data-decide="approved" data-id="${esc(a.id)}">Approve</button><button class="ghost" data-decide="dismissed" data-id="${esc(a.id)}">Dismiss</button></div>` : ''}</div>`).join('')
+      : '<div class="empty">Nothing queued yet. Ask the agent about a risky change: it can queue a review request here, and only a person can approve it.</div>';
+  } catch (e) { $('actionslist').innerHTML = '<div class="empty">Could not load actions.</div>'; }
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-decide]'); if (!b) return; b.disabled = true;
+  try { await fetch('/api/actions/' + encodeURIComponent(b.dataset.id) + '/decide', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ decision: b.dataset.decide }) }); } catch (err) { /* reload shows the real state */ }
+  loadActions();
+});
 
 /* ---------- boot ---------- */
 function onRepoChange() { renderExamples(); askLoaded = false; $('gresult').innerHTML = ''; showTab(); }

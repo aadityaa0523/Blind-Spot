@@ -81,5 +81,17 @@ def hidden_modules(repo: str = "repo") -> str:
     return _run(tools.hidden_modules, repo)
 
 
+@mcp.tool()
+def gate_change(files: list[str], repo: str = "repo") -> str:
+    """Risk verdict for a set of changed files, relative to the repository's own history."""
+    return _run(tools.gate_change, repo, files=files)
+
+
+@mcp.tool()
+def request_review(files: list[str], reason: str = "", repo: str = "repo") -> str:
+    """ACTION: queue a review request for a MEDIUM or HIGH risk change. Only queued: a person approves it on the Board."""
+    return _run(tools.request_review, repo, files=files, reason=reason)
+
+
 if __name__ == "__main__":
     mcp.run()

@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import actions
 import checks
 import gate
 import ingest
@@ -245,6 +246,25 @@ def api_report(repo_name: str = "repo"):
         lines += ["", "### Recommended reviewers", ""] + [f"- {r['name']}: {r['checks']} checks" for r in an["reviewer_load"]]
     lines += ["", "_Generated from the FalkorDB graph; no LLM involved._", ""]
     return PlainTextResponse(chr(10).join(lines), media_type="text/markdown")
+
+
+@app.get("/api/actions")
+def api_actions():
+    """Actions the agent has queued (and what people decided)."""
+    return actions.listing()
+
+
+class Decision(BaseModel):
+    decision: str
+
+
+@app.post("/api/actions/{action_id}/decide")
+def api_decide(action_id: str, body: Decision):
+    if body.decision not in ("approved", "dismissed"):
+        raise HTTPException(400, "decision must be 'approved' or 'dismissed'")
+    if not actions.decide(action_id, body.decision):
+        raise HTTPException(404, "no pending action with that id")
+    return {"ok": True}
 
 
 @app.get("/api/knowledge")
