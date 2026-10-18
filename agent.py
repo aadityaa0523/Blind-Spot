@@ -17,6 +17,25 @@ load_dotenv()
 MODELS = [m.strip() for m in os.getenv("LLM_MODELS", os.getenv("LLM_MODEL", "gemini/gemini-3.7-flash")).split(",") if m.strip()]
 MAX_STEPS = 2  # round 1 gathers evidence, round 2 lets the agent follow up on it (multi-hop); ~3 LLM calls per question
 _dead = set()
+
+_mcp = None
+_mcp_failed = False
+
+
+def mcp_tools():
+    """The agent's tools come from the MCP server (AGENT_TOOLS=mcp, the default). Falls back to in-process calls if MCP cannot start."""
+    global _mcp, _mcp_failed
+    if os.getenv("AGENT_TOOLS", "mcp") != "mcp" or _mcp_failed:
+        return None
+    if _mcp is None:
+        try:
+            from mcp_client import MCPTools
+            _mcp = MCPTools()
+        except Exception as e:  # keep the app working without MCP
+            _mcp_failed = True
+            print("MCP tool transport unavailable, using in-process tools:", str(e)[:120])
+            return None
+    return _mcp
 FILE_RE = re.compile(r"[\w./-]+\.(?:py|md|ts|tsx|js|jsx|json|toml|ya?ml|ipynb|rs|go|java|c|h|cpp|txt|cfg|lock|html|css)")
 
 INVESTIGATOR = """You are the Investigator in a codebase-knowledge system. A graph database holds the git history of one \
@@ -77,12 +96,15 @@ def ask_stream(user: str, question: str, repo: str = "repo"):
                ms=round((time.perf_counter() - t0) * 1000), data=mem)
 
     # 2. Investigator picks tools (fixed catalogue) in one parallel round.
-    yield {"type": "status", "text": "Investigator is choosing graph tools..."}
+    mcp = mcp_tools()
+    schemas = mcp.schemas if mcp else SCHEMAS
+    via = "mcp" if mcp else None
+    yield {"type": "status", "text": "Investigator is choosing graph tools" + (" (discovered over MCP)..." if mcp else "...")}
     msgs = [{"role": "system", "content": INVESTIGATOR.format(memory=json.dumps(mem))},
             {"role": "user", "content": question}]
     model_used = ""
     for _ in range(MAX_STEPS):
-        resp = _llm(msgs, SCHEMAS)
+        resp = _llm(msgs, schemas)
         model_used = resp.model_used
         reply = resp.choices[0].message
         if not reply.tool_calls:
@@ -94,7 +116,10 @@ def ask_stream(user: str, question: str, repo: str = "repo"):
             CURRENT.set(repo)  # streamed generators resume on different threads: set the repo right before each call
             try:
                 args = json.loads(call.function.arguments or "{}")
-                out = TOOLS[name](**args) if name in TOOLS else {"ok": False, "data": {"error": "unknown tool"}, "path": []}
+                if mcp:
+                    out = mcp.call(name, args, repo)
+                else:
+                    out = TOOLS[name](**args) if name in TOOLS else {"ok": False, "data": {"error": "unknown tool"}, "path": []}
             except Exception as e:  # bad args from the model must not crash the crew
                 args, out = {}, {"ok": False, "data": {"error": str(e)[:200]}, "path": []}
             ms = round((time.perf_counter() - t0) * 1000)
@@ -104,7 +129,7 @@ def ask_stream(user: str, question: str, repo: str = "repo"):
                     nodes.setdefault(n, dict(id=n))
                 links.append(dict(source=a, target=b, label=rel))
             msgs.append({"role": "tool", "tool_call_id": call.id, "content": json.dumps(out)[:6000]})
-            yield step("Investigator", name, json.dumps(out["data"])[:200], args=args, ok=out["ok"], ms=ms, data=out["data"], path=out["path"])
+            yield step("Investigator", name, json.dumps(out["data"])[:200], args=args, ok=out["ok"], ms=ms, via=via, data=out["data"], path=out["path"])
 
     # 3. Writer answers from evidence only; unverifiable file names are rejected.
     yield {"type": "status", "text": "Writer is composing an answer from the evidence..."}

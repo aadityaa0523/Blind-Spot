@@ -203,7 +203,7 @@ async function loadMemory() {
 }
 function addStep(ev) {
   const el = document.createElement('div'); el.className = 'step ' + ev.agent;
-  el.innerHTML = `<span class="who">${esc(ev.agent)}</span><div><b>${esc(ev.action)}</b>${ev.ok === false ? ' <span class="err">(failed)</span>' : ''}<code>${esc((ev.summary || '').slice(0, 220))}</code></div>${ev.ms != null ? `<span class="ms">${esc(ev.ms)} ms</span>` : '<span></span>'}`;
+  el.innerHTML = `<span class="who">${esc(ev.agent)}</span><div><b>${esc(ev.action)}</b>${ev.ok === false ? ' <span class="err">(failed)</span>' : ''}<code>${esc((ev.summary || '').slice(0, 220))}</code></div>${ev.ms != null ? `<span class="ms">${ev.via ? esc(String(ev.via).toUpperCase()) + ' · ' : ''}${esc(ev.ms)} ms</span>` : '<span></span>'}`;
   $('trace').appendChild(el);
 }
 const ui = { status: null };
