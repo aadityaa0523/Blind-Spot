@@ -56,7 +56,7 @@ blast-radius, PageRank and shortest-path queries meaningful.
 
 **Tools, not generated Cypher**
 
-The agent has six fixed tools (`who_knows`, `impact`, `why`, `load_bearing`, `path_between`, `suggest_reviewers`),
+The agent has nine fixed tools (`who_knows`, `impact`, `why`, `load_bearing`, `path_between`, `suggest_reviewers`, `who_knows_topic`, `bus_factor`, `hidden_modules`),
 each a parameterised query I wrote. The model picks tools and fills typed arguments. It never writes a query, so
 there is nothing to inject, and every name is resolved against the graph first. If it can't find a file, it says so.
 

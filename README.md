@@ -15,7 +15,7 @@ The demo runs on the real history of [FalkorDB/GraphRAG-SDK](https://github.com/
 |---|---|
 | **Merge gate** | Paste a PR URL. A risk score (0-100) with every point explained, and a verdict relative to the repo's own history ("riskier than 91% of past changes"), the files that *usually change with this one but aren't in the PR* (with confidence), recommended reviewers, the commits that explain *why* the code looks like this, and the evidence graph. **No LLM**: graph queries only, so it is instant and repeatable. |
 | **Board / Analytics / Audit** | Every verdict is stored in a `checks` graph. The **board** lists them with filters and permalinks (`#check/<id>`); **analytics** shows verdict mix, files most often flagged, reviewer load and timing; the **audit log** is hash-chained so an edited or removed record is detected (`Verify the chain`). A report can be downloaded as Markdown. |
-| **Ask** | A four-agent crew (Memory Keeper → Investigator → Writer → Memory Keeper) answers questions with six fixed graph tools. Every step streams live with its query time; answers are rejected if they name a file that isn't in the evidence. One isolated memory graph per user. |
+| **Ask** | A four-agent crew (Memory Keeper → Investigator → Writer → Memory Keeper) answers questions with nine fixed graph tools. Every step streams live with its query time; answers are rejected if they name a file that isn't in the evidence. One isolated memory graph per user. |
 | **Proof** | A walk-forward backtest computed live from the repo's own history, the scoring formula, and the known gaps. |
 
 Also: an **MCP server** exposing the same graph tools (`mcp_server.py`), and a **recorded-run replay** on the Ask page that
@@ -62,6 +62,12 @@ higher number because it let the gate see future commits; it was replaced by the
 * **Tenant isolation at scale** (Proof page): `python bench_tenants.py` creates thousands of per-user memory graphs in one FalkorDB, reads them in parallel and
   checks every answer contains only its own tenant's data. Last run: 2,000 graphs, 10,000 reads, median 15.7 ms, p95 29.9 ms, 0 isolation violations
   (one machine, Python client; a sanity check, not a capacity claim).
+
+* **Three more agent and MCP tools:** `who_knows_topic` (who has written about a topic, from commit messages), `bus_factor` and `hidden_modules`
+  (the two views above), so the algorithms are tools the agent can call, not just pages.
+* **Procedural memory:** after each answer the agent stores which tool plan worked for that *kind* of question (change review, ownership, rationale, centrality,
+  connection) in the user's own memory graph, and starts from it next session. Episodes and facts are the other two memory types. This is a
+  simple keyword-classified plan store, not a learned policy.
 
 ## Why a graph
 
@@ -184,7 +190,7 @@ Click any node in the graph to ask about it; switch the "You are" field to see a
 { "mcpServers": { "blindspot": { "command": "python", "args": ["mcp_server.py"], "cwd": "/path/to/blindspot" } } }
 ```
 
-Tools: `list_repos`, `who_knows`, `impact`, `why`, `load_bearing`, `path_between`, `suggest_reviewers` (each takes an optional `repo`).
+Tools: `list_repos`, `who_knows`, `impact`, `why`, `load_bearing`, `path_between`, `suggest_reviewers`, `who_knows_topic`, `bus_factor`, `hidden_modules` (each takes an optional `repo`).
 
 ## Verification
 

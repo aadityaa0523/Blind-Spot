@@ -63,5 +63,23 @@ def suggest_reviewers(files: list[str], exclude: str = "", repo: str = "repo") -
     return _run(tools.suggest_reviewers, repo, files=files, exclude=exclude)
 
 
+@mcp.tool()
+def who_knows_topic(topic: str, limit: int = 5, repo: str = "repo") -> str:
+    """Who has written about a topic in commit messages, and which files that work touched."""
+    return _run(tools.who_knows_topic, repo, topic=topic, limit=limit)
+
+
+@mcp.tool()
+def bus_factor(module: str = "", repo: str = "repo") -> str:
+    """Knowledge risk: modules with the fewest people behind them, and files one person wrote almost alone."""
+    return _run(tools.bus_factor, repo, module=module)
+
+
+@mcp.tool()
+def hidden_modules(repo: str = "repo") -> str:
+    """Groups of files that change as a unit (communities in the co-change graph)."""
+    return _run(tools.hidden_modules, repo)
+
+
 if __name__ == "__main__":
     mcp.run()

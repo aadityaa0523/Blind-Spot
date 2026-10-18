@@ -23,7 +23,8 @@ INVESTIGATOR = """You are the Investigator in a codebase-knowledge system. A gra
 repository (people, commits, PRs, files, co-change links). Answer the user's question ONLY by calling the provided tools; \
 never guess. Call every tool you need at once, in parallel (e.g. impact + who_knows + why + suggest_reviewers for a change question). You get a second turn to follow up on results (e.g. who_knows on a file that load_bearing returned), then stop. If a tool says \
 a file is ambiguous or unknown, say so instead of inventing one. Stop calling tools when you have enough evidence.
-Memory from earlier sessions with this user (may be empty): {memory}"""
+Memory from earlier sessions with this user (may be empty): {memory}
+If the memory contains a \"procedure\", it is the tool plan that worked for this kind of question before: start from it and add tools only if the question needs more."""
 
 WRITER = """You are the Writer. Using ONLY the evidence JSON below, answer the user concisely (max ~180 words). \
 Cite commits/PRs/people exactly as they appear in the evidence. Name only files that appear in the evidence. \
@@ -71,7 +72,8 @@ def ask_stream(user: str, question: str, repo: str = "repo"):
     # 1. Memory Keeper reads the user's own graph first.
     t0 = time.perf_counter()
     mem = memory.recall(user, FILE_RE.findall(question))
-    yield step("MemoryKeeper", "recall", f"{len(mem['facts'])} facts, {len(mem['episodes'])} past episodes from graph mem_{user}",
+    mem['procedure'] = memory.procedure_for(user, question)
+    yield step("MemoryKeeper", "recall", f"{len(mem['facts'])} facts, {len(mem['episodes'])} past episodes" + (f", procedure: {' + '.join(mem['procedure']['tools'])} (used {mem['procedure']['uses']}x)" if mem.get("procedure") else "") + f" from graph mem_{user}",
                ms=round((time.perf_counter() - t0) * 1000), data=mem)
 
     # 2. Investigator picks tools (fixed catalogue) in one parallel round.
@@ -123,7 +125,8 @@ def ask_stream(user: str, question: str, repo: str = "repo"):
     elif files:
         facts.append(f"User is interested in {files[0].rsplit('/', 1)[-1]}")
     memory.remember(user, question, answer, files, facts)
-    yield step("MemoryKeeper", "remember", f"stored 1 episode + {len(facts)} fact(s) in graph mem_{user}")
+    learned = memory.learn_procedure(user, question, [e['tool'] for e in evidence if e['ok']])
+    yield step("MemoryKeeper", "remember", f"stored 1 episode + {len(facts)} fact(s)" + (f" + procedure for '{learned}' questions" if learned else "") + f" in graph mem_{user}")
 
     yield {"type": "final", "answer": answer, "graph": dict(nodes=list(nodes.values()), links=links), "task": task.id,
            "grounded": not invented, "repo": repo}

@@ -5,6 +5,7 @@ Every tool returns {"ok", "data", "path"}: `path` is the graph evidence (nodes/e
 import contextvars
 import time
 
+import insights
 from db import repo
 
 CURRENT = contextvars.ContextVar("repo", default="repo")  # which repo graph the tools query
@@ -113,7 +114,39 @@ def suggest_reviewers(files: list[str], exclude: str = ""):
             "path": [[r[0], "AUTHORED->TOUCHED", f"{r[2]}/{len(resolved)} files"] for r in rows]}
 
 
-TOOLS = {f.__name__: f for f in (who_knows, impact, why, load_bearing, path_between, suggest_reviewers)}
+def who_knows_topic(topic: str, limit: int = 5):
+    """Who has written about a topic (commit subjects and messages), and which files that work touched."""
+    q = topic.strip().lower()[:60]
+    if len(q) < 3:
+        return {"ok": False, "data": {"error": "give a topic of at least 3 characters"}, "path": []}
+    where = "WHERE toLower(c.subject) CONTAINS $t OR toLower(c.body) CONTAINS $t"
+    people = _q(f"MATCH (p:Person)-[:AUTHORED]->(c:Commit) {where} RETURN p.name, count(c) AS n, max(c.date) ORDER BY n DESC LIMIT $l", {"t": q, "l": limit})
+    files = _q(f"MATCH (c:Commit)-[:TOUCHED]->(f:File) {where} RETURN f.path, count(c) AS n ORDER BY n DESC LIMIT 5", {"t": q})
+    if not people:
+        return {"ok": True, "data": {"topic": q, "experts": [], "note": "No commit mentions this topic (not modelled != nobody knows)."}, "path": []}
+    top = files[0][0] if files else ""
+    return {"ok": True, "data": {"topic": q, "experts": [dict(person=r[0], commits=r[1], last_commit=r[2]) for r in people],
+                                 "files": [dict(file=r[0], commits=r[1]) for r in files]},
+            "path": [[r[0], f"wrote {r[1]} commits about '{q}'", top] for r in people if top]}
+
+
+def bus_factor(module: str = ""):
+    """Knowledge risk: modules with the fewest people behind them, and files one person wrote almost alone."""
+    k = insights.knowledge(repo(CURRENT.get()))
+    mods = [m for m in k["modules"] if module.lower() in m["module"].lower()][:5]
+    files = [f for f in k["single_owner_files"] if module.lower() in f["path"].lower()][:5]
+    return {"ok": True, "data": {"modules": mods, "single_owner_files": files},
+            "path": [[m["owners"][0]["name"], f"wrote {round(m['owners'][0]['share'] * 100)}% of", m["module"]] for m in mods]}
+
+
+def hidden_modules():
+    """Groups of files that change as a unit (communities in the co-change graph), often across folders."""
+    cl = insights.clusters(repo(CURRENT.get()))[:4]
+    path = [[c["files"][0], "changes as a unit with", f] for c in cl for f in c["files"][1:4]]
+    return {"ok": True, "data": {"clusters": cl}, "path": path}
+
+
+TOOLS = {f.__name__: f for f in (who_knows, impact, why, load_bearing, path_between, suggest_reviewers, who_knows_topic, bus_factor, hidden_modules)}
 
 SCHEMAS = [
     {"type": "function", "function": {"name": "who_knows", "description": "Top experts for a file by commit history.",
@@ -128,6 +161,12 @@ SCHEMAS = [
         "parameters": {"type": "object", "properties": {"a": {"type": "string"}, "b": {"type": "string"}}, "required": ["a", "b"]}}},
     {"type": "function", "function": {"name": "suggest_reviewers", "description": "ACTION: pick reviewers for a change that touches these files.",
         "parameters": {"type": "object", "properties": {"files": {"type": "array", "items": {"type": "string"}}, "exclude": {"type": "string"}}, "required": ["files"]}}},
+    {"type": "function", "function": {"name": "who_knows_topic", "description": "Who has written about a topic (e.g. 'deduplication') in commit messages, and which files that work touched.",
+        "parameters": {"type": "object", "properties": {"topic": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["topic"]}}},
+    {"type": "function", "function": {"name": "bus_factor", "description": "Knowledge risk: modules with the fewest people behind them and files one person wrote almost alone. Optional module name filter.",
+        "parameters": {"type": "object", "properties": {"module": {"type": "string"}}}}},
+    {"type": "function", "function": {"name": "hidden_modules", "description": "Communities in the co-change graph: groups of files that change as a unit, often across folders.",
+        "parameters": {"type": "object", "properties": {}}}},
 ]
 
 

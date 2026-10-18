@@ -5,6 +5,7 @@ mem_<user>:  (Episode {question, answer, ts})-[:ABOUT]->(Entity {name})   episod
 board:       (Task)-[:HAS_STEP]->(Step {agent, action, summary})           coordination / handoffs
              (Step)-[:NEXT]->(Step)
 """
+import json
 import time
 import uuid
 
@@ -69,3 +70,34 @@ class Task:
             if self.n > 1 else BOARD.query(
                 "MATCH (t:Task {id:$id}) CREATE (t)-[:HAS_STEP]->(:Step {n:1, agent:$a, action:$ac, summary:$s})",
                 {"id": self.id, "a": agent, "ac": action, "s": summary[:300]})
+
+
+# ---- procedural memory: which tool plan worked for which KIND of question ----
+KINDS = [("change-review", ("reviewer", "review", "break", "changing", "what else")), ("ownership", ("who knows", "owner", "bus factor", "knows about", "expert")),
+         ("rationale", ("why", "decision", "built the way")), ("centrality", ("load-bearing", "important", "central")), ("connection", ("connected", "path between", "related to"))]
+
+
+def question_kind(q: str) -> str:
+    ql = q.lower()
+    return next((k for k, words in KINDS if any(w in ql for w in words)), "general")
+
+
+def learn_procedure(user: str, question: str, tools_used: list[str]):
+    """Remember the tool plan that just worked for this kind of question (and how often it was used)."""
+    plan = list(dict.fromkeys(tools_used))
+    if not plan:
+        return None
+    kind = question_kind(question)
+    memory(user).query("MERGE (p:Procedure {kind:$k}) ON CREATE SET p.uses = 0 "
+                       "SET p.uses = p.uses + 1, p.tools = $t, p.ts = $ts, p.name = $n "
+                       "MERGE (k:Kind {name:$k}) MERGE (p)-[:FOR]->(k)",
+                       {"k": kind, "t": json.dumps(plan), "ts": int(time.time()), "n": f"how to answer {kind} questions: {' + '.join(plan)}"})
+    return kind
+
+
+def procedure_for(user: str, question: str):
+    try:
+        rows = memory(user).ro_query("MATCH (p:Procedure {kind:$k}) RETURN p.kind, p.tools, p.uses", {"k": question_kind(question)}).result_set
+    except Exception:  # new user: no graph yet
+        return None
+    return dict(kind=rows[0][0], tools=json.loads(rows[0][1]), uses=rows[0][2]) if rows else None
