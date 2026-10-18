@@ -25,7 +25,8 @@ docker compose up -d --build
 
 - Verified locally (without Docker): the app, the 15 tests, the audit chain, the PR cache, rate limits and the CI script.
 - **Not verified:** FalkorDB Cloud connection details (TLS, port), Render's free-tier limits (512 MB RAM, sleeps when idle, so the first request after a pause is slow), and the Render blueprint itself.
-- **Docker image build and first-start bootstrap on a clean database: not yet confirmed** (a test run was in progress when this was written). Treat `docker compose up` as untested until you have run it.
+- Verified in WSL with `docker run`: the image builds; against a clean FalkorDB container the app is healthy within seconds, builds the demo graph itself (513 commits, 204 files, 3,942 relationships), seeds 12 audit records from the bundled PRs without any GitHub calls, and the audit chain verifies.
+- **Not verified:** `docker compose up` itself (the compose file was not run; the same image was run by hand).
 
 ## Cautions for a public demo
 
