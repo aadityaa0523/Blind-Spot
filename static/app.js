@@ -491,6 +491,7 @@ async function loadActions() {
     $('actionslist').innerHTML = list.length ? list.slice(0, 8).map(a => `<div class="act"><div class="top"><span class="badge ${esc(a.status)}">${esc(a.status)}</span><span class="tag ${esc(a.verdict)}">${esc(a.verdict)}</span><b>${a.score ?? '?'}</b><span class="meta">${esc(repoLabel(a.repo))} · ${a.files.length} files · ${esc(ago(a.ts))}</span></div>
         <div class="why">Review request for <code>${a.files.slice(0, 3).map(f => esc(base(f))).join(', ')}${a.files.length > 3 ? ' +' + (a.files.length - 3) : ''}</code>${a.reason ? ' · ' + esc(a.reason) : ''}</div>
         <div class="meta">Reviewers chosen from the graph: ${a.reviewers.length ? a.reviewers.map(esc).join(', ') : 'none found'}</div>
+        ${a.triage ? `<div class="meta">Triage agent (separate process): ${esc(a.triage)}</div>` : ''}
         ${a.status === 'pending' ? `<div class="btns"><button data-decide="approved" data-id="${esc(a.id)}">Approve</button><button class="ghost" data-decide="dismissed" data-id="${esc(a.id)}">Dismiss</button></div>` : ''}</div>`).join('')
       : '<div class="empty">Nothing queued yet. Ask the agent about a risky change: it can queue a review request here, and only a person can approve it.</div>';
   } catch (e) { $('actionslist').innerHTML = '<div class="empty">Could not load actions.</div>'; }

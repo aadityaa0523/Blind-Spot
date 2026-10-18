@@ -11,6 +11,12 @@ services:
     environment: { FALKORDB_HOST: falkordb, CLONE_DIR: /data/clones }
     depends_on: { falkordb: { condition: service_healthy } }
     volumes: ["clones:/data/clones"]
+  worker:                                # second, independent agent process (triage); shares state with the app only through FalkorDB
+    build: .
+    command: ["python", "worker.py"]
+    env_file: [.env]
+    environment: { FALKORDB_HOST: falkordb }
+    depends_on: { falkordb: { condition: service_healthy } }
 volumes:
   falkor-data:
   clones:

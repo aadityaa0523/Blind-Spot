@@ -73,6 +73,13 @@ higher number because it let the gate see future commits; it was replaced by the
   request (graph-chosen reviewers, the evidence, the verdict) on the Board. It can only queue: a person approves or dismisses it, and nothing is sent anywhere.
   On a LOW-risk change it correctly queues nothing. Tested on the real graph and verified live with the model on the 8-file PR #335 change (HIGH, 88/100).
 
+* **Tool selection over MCP:** the Ask agent discovers its eleven tools from the MCP server (`mcp_client.py`) and executes the model's choices through the MCP
+  session. The `repo` argument is hidden from the model and injected by the client, so the model cannot point a tool at another tenant's graph. Falls back
+  to in-process calls if MCP cannot start (`AGENT_TOOLS=direct` forces that). Verified live: every call in a run used MCP.
+* **Two agents, two processes, one shared graph:** `python worker.py` is a separate Triage agent. It watches the review requests the Ask agent queued, checks how many
+  other open requests each suggested reviewer has, rebalances if someone is overloaded, and writes its note back to the same record. The two agents never call
+  each other: they coordinate only through FalkorDB. The Triage agent is rule-based, not an LLM. Run it next to the app (`docker compose` starts it too).
+
 ## Why a graph
 
 "What else breaks if I change `graph_store.py`, who understands it, and why is it built this way?" spans people,

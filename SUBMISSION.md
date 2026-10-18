@@ -17,6 +17,7 @@
    we also say it is weak on small repos."
 4b. **Proof, second card (10s).** "2,000 isolated memory graphs in one FalkorDB, median 15.7 ms, zero cross-tenant leaks", and say it is one machine, a sanity check.
 4c. **Agent acts (25s).** Board page, **Agent actions**: "the agent judged this change HIGH risk from the graph, chose reviewers from who actually wrote these files, and queued a review request. It can only queue; I approve." Press **Approve**.
+4d. **Two agents (15s).** With `python worker.py` running in a terminal, the Board shows a line from the Triage agent on the queued request: "a second agent, a separate process, coordinating only through the graph."
 5. **2:00 Agents and memory (35s).** Ask page, **Watch a recorded run** (or ask live): the crew hands off through the graph, each
    graph query takes milliseconds, the answer is marked *grounded*. Replay a second run: "Last time you asked about..." comes from
    that user's own memory graph.
