@@ -5,7 +5,7 @@ const base = s => String(s).split('/').pop();
 let overviewData = { nodes: [], links: [] }, repos = [];
 
 /* ---------- routing ---------- */
-const TABS = ['home', 'gate', 'board', 'analytics', 'audit', 'ask', 'proof', 'safety', 'integrate'], APP_TABS = ['gate', 'ask', 'proof'], ANCHORS = ['judge', 'faq'];
+const TABS = ['home', 'gate', 'board', 'analytics', 'audit', 'ask', 'proof', 'safety', 'integrate'], APP_TABS = ['gate', 'ask', 'proof'], ANCHORS = ['tour', 'faq'];
 let homeLoaded = false, lastTab = null;
 function showTab() {
   const [t, arg] = (location.hash || '#home').slice(1).split('/'), anchor = ANCHORS.includes(t) ? t : null;
