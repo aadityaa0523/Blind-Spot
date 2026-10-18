@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css?v=19">
+<link rel="stylesheet" href="/static/app.css?v=25">
 <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
@@ -82,28 +82,68 @@
     </div>
   </section>
 
-  <section class="band band-paper">
+    <section class="band" id="how">
     <div class="wrap">
-      <h2>Three steps, <em>no magic</em>.</h2>
-      <p class="sub">Every verdict can be traced back to a query you can run yourself in FalkorDB Browser.</p>
-      <div class="steps">
-        <article class="step-card"><div class="n">01 · READ</div><h3>Read the history</h3>
-          <p>Only <code>git log</code> and <code>git ls-tree</code>. No checkout, and no code from the repository is ever run.</p>
-<pre class="code"><span class="c"># history only, blobless</span>
-git clone <span class="k">--filter=blob:none</span> \
-          <span class="k">--no-checkout</span> &lt;url&gt;</pre></article>
-        <article class="step-card"><div class="n">02 · WALK</div><h3>Walk the graph</h3>
-          <p>People, commits and files become nodes. Files that change together get a weighted edge.</p>
-<pre class="code">MATCH (f:File)-[e:<span class="k">CO_CHANGED_WITH</span>]-&gt;(o:File)
-WHERE f.path IN $files
-  AND NOT o.path IN $files
-RETURN o.path, e.weight</pre></article>
-        <article class="step-card"><div class="n">03 · EXPLAIN</div><h3>Explain every point</h3>
-          <p>Load-bearing files, missing companions, module spread and size add up to a score, each shown beside its reason.</p>
-<pre class="code">Load-bearing file    <span class="k">35</span> / 35
-Missing companions   <span class="k">37</span> / 40
-Spans modules        <span class="k">10</span> / 10
-Change size           <span class="k">6</span> / 15</pre></article>
+      <h2 style="text-align:center">Three steps, <em>no magic</em>.</h2>
+      <p class="sub" style="margin:0 auto;text-align:center">Every verdict traces back to a query you can run yourself in FalkorDB Browser.</p>
+      <div class="hiw">
+        <div class="hiw-left">
+          <div class="hiw-tabs" role="tablist" aria-label="How it works">
+            <button class="hiw-tab" role="tab" id="hiw-t0" aria-controls="hiw-p0" aria-selected="true" type="button">Read the history</button>
+            <button class="hiw-tab" role="tab" id="hiw-t1" aria-controls="hiw-p1" aria-selected="false" tabindex="-1" type="button">Walk the graph</button>
+            <button class="hiw-tab" role="tab" id="hiw-t2" aria-controls="hiw-p2" aria-selected="false" tabindex="-1" type="button">Explain every point</button>
+          </div>
+          <div class="hiw-preview">
+            <div class="hiw-pane" id="hiw-p0" role="tabpanel" aria-labelledby="hiw-t0">
+              <div class="term">
+                <div class="line"><span class="prompt">$</span> git clone <b>--filter=blob:none --no-checkout</b> github.com/FalkorDB/GraphRAG-SDK</div>
+                <div class="line dim">history only: no checkout, and no repository code is run</div>
+                <div class="line"><span class="prompt">$</span> git log --name-only --format=...</div>
+              </div>
+              <div class="kv"><div><b class="js-commits">513</b><span>commits</span></div><div><b class="js-files">204</b><span>files</span></div><div><b class="js-people">11</b><span>people</span></div></div>
+            </div>
+            <div class="hiw-pane" id="hiw-p1" role="tabpanel" aria-labelledby="hiw-t1" hidden>
+              <svg class="mini-graph" viewBox="0 0 520 200" role="img" aria-label="Three changed files, each linked to a file that usually changes with it but is missing from the pull request">
+                <g class="mg-row"><line x1="110" y1="34" x2="410" y2="34" class="mg-e"/><text x="260" y="26" class="mg-l" text-anchor="middle">50%</text>
+                  <circle cx="110" cy="34" r="8" class="mg-t"/><circle cx="410" cy="34" r="8" class="mg-m"/>
+                  <text x="110" y="58" class="mg-n" text-anchor="middle">test_judge_dedup.py</text><text x="410" y="58" class="mg-n" text-anchor="middle">test_merge_invariants.py</text></g>
+                <g class="mg-row"><line x1="110" y1="102" x2="410" y2="102" class="mg-e"/><text x="260" y="94" class="mg-l" text-anchor="middle">45%</text>
+                  <circle cx="110" cy="102" r="8" class="mg-t"/><circle cx="410" cy="102" r="8" class="mg-m"/>
+                  <text x="110" y="126" class="mg-n" text-anchor="middle">graph_store.py</text><text x="410" y="126" class="mg-n" text-anchor="middle">api/main.py</text></g>
+                <g class="mg-row"><line x1="110" y1="170" x2="410" y2="170" class="mg-e"/><text x="260" y="162" class="mg-l" text-anchor="middle">45%</text>
+                  <circle cx="110" cy="170" r="8" class="mg-t"/><circle cx="410" cy="170" r="8" class="mg-m"/>
+                  <text x="110" y="194" class="mg-n" text-anchor="middle">storage.mdx</text><text x="410" y="194" class="mg-n" text-anchor="middle">ingestion.mdx</text></g>
+              </svg>
+              <ul class="mg-list" aria-label="Files that usually change together but are missing from the pull request">
+                <li><code>test_judge_dedup.py</code><span>usually changes with</span><code>test_merge_invariants.py</code><b>50%</b></li>
+                <li><code>graph_store.py</code><span>usually changes with</span><code>api/main.py</code><b>45%</b></li>
+                <li><code>storage.mdx</code><span>usually changes with</span><code>ingestion.mdx</code><b>45%</b></li>
+              </ul>
+              <div class="legend"><span><i style="background:var(--risk)"></i>changed in the PR</span><span><i style="background:var(--warn)"></i>usually changes too, missing</span></div>
+              <pre class="code">MATCH (f:File)-[e:<span class="k">CO_CHANGED_WITH</span>]-&gt;(o:File)
+WHERE f.path IN $files AND NOT o.path IN $files
+RETURN o.path, e.weight</pre>
+            </div>
+            <div class="hiw-pane" id="hiw-p2" role="tabpanel" aria-labelledby="hiw-t2" hidden>
+              <div class="hiw-score"><div class="big">88<small>/ 100</small></div><div><span class="tag HIGH">HIGH RISK</span><p class="note">PR #335 · riskier than 91% of this repository's past changes</p></div></div>
+              <div class="factor"><div class="top"><span>Load-bearing file</span><b>35 / 35</b></div><div class="bar2"><i style="width:100%"></i></div></div>
+              <div class="factor"><div class="top"><span>Files that usually change with these, but not here</span><b>37 / 40</b></div><div class="bar2"><i style="width:92%"></i></div></div>
+              <div class="factor"><div class="top"><span>Spans modules</span><b>10 / 10</b></div><div class="bar2"><i style="width:100%"></i></div></div>
+              <div class="factor"><div class="top"><span>Change size</span><b>6 / 15</b></div><div class="bar2"><i style="width:40%"></i></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="hiw-steps">
+          <article class="hiw-step"><div class="hiw-inline"></div><span class="n">01 · READ</span><h3>Read the history</h3>
+            <p>Only <code>git log</code> and <code>git ls-tree</code>. No checkout, and no code from the repository is ever run. Merge commits are followed, so every commit knows which pull request it belonged to.</p>
+            <div class="receipt">ingest.py · tests/test_core.py::test_resolver_never_guesses</div></article>
+          <article class="hiw-step"><div class="hiw-inline"></div><span class="n">02 · WALK</span><h3>Walk the graph</h3>
+            <p>People, commits and files become nodes. Files that change together get a weighted edge, so "what usually travels with this file?" is a one-hop query, and PageRank finds the files everything leans on.</p>
+            <div class="receipt">tools.py · gate.py · tests/test_core.py::test_tools_return_graph_paths</div></article>
+          <article class="hiw-step"><div class="hiw-inline"></div><span class="n">03 · EXPLAIN</span><h3>Explain every point</h3>
+            <p>Load-bearing files, missing companions, module spread and size add up to a score, each shown next to its reason. The verdict compares that score with the repository's own past changes. No model is involved.</p>
+            <div class="receipt">gate.py · backtest.py · tests/test_core.py::test_gate_explains_its_score_and_never_guesses</div></article>
+        </div>
       </div>
     </div>
   </section>
@@ -379,6 +419,6 @@ jobs:
   </form>
 </dialog>
 
-<script src="/static/app.js?v=12"></script>
+<script src="/static/app.js?v=25"></script>
 </body>
 </html>

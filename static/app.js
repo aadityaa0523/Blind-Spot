@@ -289,6 +289,7 @@ function renderPreview(d) {
 }
 async function loadHome() {
   homeLoaded = true;
+  fillHow();
   const [sum, proof] = await Promise.all([fetch('/api/summary').then(r => r.json()).catch(() => null), fetch('/api/proof?repo_name=repo').then(r => r.json()).catch(() => null)]);
   if (sum) { $('s-repos').textContent = sum.repos; $('s-commits').textContent = fmt(sum.commits); $('s-edges').textContent = fmt(sum.edges);
     $('livetext').textContent = `live · ${sum.repos} repos · FalkorDB`; }
@@ -426,7 +427,38 @@ document.addEventListener('keydown', e => {
   if (e.key === 'g') gPending = Date.now();
 });
 
+/* ---------- how it works: scroll-driven steps with a sticky preview ---------- */
+function initHow() {
+  const steps = [...document.querySelectorAll('.hiw-step')], tabs = [...document.querySelectorAll('.hiw-tab')], panes = [...document.querySelectorAll('.hiw-left .hiw-pane')];
+  if (!steps.length || steps.length !== panes.length) return;
+  steps.forEach((s, i) => { s.querySelector('.hiw-inline').innerHTML = panes[i].innerHTML; });   // on phones each preview sits inside its own step
+  const set = i => {
+    tabs.forEach((t, k) => { t.setAttribute('aria-selected', String(k === i)); t.tabIndex = k === i ? 0 : -1; });
+    panes.forEach((p, k) => { p.hidden = k !== i; });
+  };
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) set(steps.indexOf(e.target)); }), { rootMargin: '-42% 0px -50% 0px' });
+    steps.forEach(s => io.observe(s));
+  }
+  const go = i => steps[i].scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  tabs.forEach((t, i) => {
+    t.onclick = () => { set(i); go(i); };
+    t.onkeydown = e => {
+      const k = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]; if (!k) return;
+      e.preventDefault(); const n = (i + k + tabs.length) % tabs.length; tabs[n].focus(); set(n); go(n);
+    };
+  });
+  set(0);
+}
+async function fillHow() {  // the first preview shows the real size of the demo graph
+  try {
+    const s = await fetch('/api/stats?repo_name=repo').then(r => r.json());
+    for (const [cls, v] of [['.js-commits', s.commits], ['.js-files', s.files], ['.js-people', s.people]]) document.querySelectorAll(cls).forEach(e => { e.textContent = v; });
+  } catch (e) { /* keep the static numbers */ }
+}
+
 /* ---------- boot ---------- */
 function onRepoChange() { renderExamples(); askLoaded = false; $('gresult').innerHTML = ''; showTab(); }
 $('repo').onchange = onRepoChange;
+initHow();
 (async () => { await loadRepos(); onRepoChange(); })();
