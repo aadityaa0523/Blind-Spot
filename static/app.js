@@ -3,6 +3,27 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const short = s => String(s).split('/').slice(-2).join('/');
 const base = s => String(s).split('/').pop();
 let overviewData = { nodes: [], links: [] }, repos = [];
+/* ---------- theme: colours come from CSS variables so graphs and gauges follow light/dark ---------- */
+const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const COL = { get node() { return cssv('--graph-node'); }, get edge() { return cssv('--graph-edge'); }, get edge2() { return cssv('--graph-edge2'); },
+  get font() { return cssv('--graph-font'); }, get mute() { return cssv('--mute'); }, get risk() { return cssv('--risk'); }, get warn() { return cssv('--warn'); },
+  get info() { return cssv('--info'); }, get mem() { return cssv('--mem'); }, get go() { return cssv('--go'); }, get track() { return cssv('--track'); } };
+let lastGate = null, lastPreview = null;
+const THEME_KEY = 'blindspot-theme';
+function setTheme(t, persist) {
+  document.documentElement.dataset.theme = t;
+  if (persist) { try { localStorage.setItem(THEME_KEY, t); } catch (e) { /* private mode: the choice just won't persist */ } }
+  const light = t === 'light', b = $('themebtn');
+  if (b) { b.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme'); b.title = (light ? 'Switch to dark theme' : 'Switch to light theme') + ' (t)'; }
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = light ? '#f6f4ee' : '#0a0f1a';
+}
+function onThemeChange() {  // graphs and gauges draw colours into SVG/canvas, so redraw what is on screen
+  const tab = (location.hash || '#home').slice(1).split('/')[0];
+  if (lastPreview && $('pv-body').querySelector('.gauge')) renderPreview(lastPreview);
+  if ($('p-gate').classList.contains('on') && lastGate) renderGate(lastGate);
+  if (tab === 'ask') { askLoaded = false; loadAsk(); }
+}
+
 
 /* ---------- routing ---------- */
 const TABS = ['home', 'gate', 'board', 'analytics', 'audit', 'ask', 'proof', 'safety', 'integrate'], APP_TABS = ['gate', 'ask', 'proof'], ANCHORS = ['tour', 'faq'];
@@ -32,11 +53,11 @@ $('menubtn').onclick = () => { const o = $('nav').classList.toggle('open'); $('m
 
 /* ---------- graph helper ---------- */
 function drawGraph(el, nodes, links, opts = {}) {
-  const ids = new Set(nodes.map(n => n.id)), color = opts.color || (() => '#3b4a63'), size = opts.size || (() => 9);
+  const ids = new Set(nodes.map(n => n.id)), color = opts.color || (() => COL.node), size = opts.size || (() => 9);
   const data = {
-    nodes: nodes.map(n => ({ id: n.id, label: opts.label ? opts.label(n) : short(n.id), title: n.id, color: color(n), size: size(n), shape: 'dot', font: { color: '#e8edf5', size: 12 } })),
+    nodes: nodes.map(n => ({ id: n.id, label: opts.label ? opts.label(n) : short(n.id), title: n.id, color: color(n), size: size(n), shape: 'dot', font: { color: COL.font, size: 12 } })),
     edges: links.filter(l => ids.has(l.source) && ids.has(l.target)).map(l => ({ from: l.source, to: l.target, label: l.label || '', arrows: 'to', dashes: !!l.dashed,
-      font: { size: 10, color: '#8a97ab', strokeWidth: 0 }, color: l.color || '#243149' }))
+      font: { size: 10, color: COL.mute, strokeWidth: 0 }, color: l.color || COL.edge }))
   };
   const n = new vis.Network(el, data, { physics: { solver: 'forceAtlas2Based', forceAtlas2Based: { gravitationalConstant: -80, springLength: 120 }, stabilization: { iterations: 200 } }, interaction: { hover: true } });
   n.once('stabilizationIterationsDone', () => n.fit({ animation: false }));
@@ -64,13 +85,14 @@ function renderExamples() {
 const RING = 2 * Math.PI * 54;
 function gaugeHTML(score, verdict, id = 'ring') {
   const v = verdict === 'UNKNOWN' ? 0 : score;
-  const col = { LOW: '#b6f36a', MEDIUM: '#ffb454', HIGH: '#ff6b6b', UNKNOWN: '#8a97ab' }[verdict];
+  const col = { LOW: COL.go, MEDIUM: COL.warn, HIGH: COL.risk, UNKNOWN: COL.mute }[verdict];
   return `<div class="gauge" role="img" aria-label="Risk score ${v} out of 100, ${verdict}"><svg width="132" height="132" viewBox="0 0 132 132">
-    <circle cx="66" cy="66" r="54" fill="none" stroke="#162033" stroke-width="12"/>
+    <circle cx="66" cy="66" r="54" fill="none" stroke="${COL.track}" stroke-width="12"/>
     <circle class="ring" id="${id}" cx="66" cy="66" r="54" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${RING}" stroke-dashoffset="${RING}"/></svg>
     <div class="num"><div>${verdict === 'UNKNOWN' ? '?' : v}<small>/ 100</small></div></div></div>`;
 }
 function renderGate(d) {
+  lastGate = d;
   const pr = d.pr, v = d.verdict;
   const actions = `<div class="vactions">${d.check_id ? '<button class="ghost" id="copylink">Copy link</button>' : ''}<button class="ghost" id="copycomment">Copy as PR comment</button></div>` +
     (d.check_id ? `<div class="auditid">Audit record <code>${esc(d.check_id)}</code> · <a href="#audit">verify the chain</a></div>` : '');
@@ -95,7 +117,7 @@ function renderGate(d) {
     <div class="card"><h2>Who should review</h2>${revs}</div>
     <div class="card"><h2>Why the code looks like this</h2>${decs}</div></section>
     <section><div class="card" style="position:sticky;top:78px"><h2>Evidence graph</h2><div id="ggraph" role="img" aria-label="Graph linking changed files to missing companions and reviewers"></div>
-      <div class="legend"><span><i style="background:#ff6b6b"></i>changed in this PR</span><span><i style="background:#ffb454"></i>usually changes too, missing</span><span><i style="background:#6cb6ff"></i>reviewer</span></div></div></section></div>`;
+      <div class="legend"><span><i style="background:${COL.risk}"></i>changed in this PR</span><span><i style="background:${COL.warn}"></i>usually changes too, missing</span><span><i style="background:${COL.info}"></i>reviewer</span></div></div></section></div>`;
   requestAnimationFrame(() => { const r = $('ring'); if (r && d.score != null) r.style.strokeDashoffset = RING * (1 - d.score / 100); });
   const lk = $('copylink'); if (lk) lk.onclick = () => copyText(location.origin + '/#check/' + d.check_id, lk, 'Link copied');
   const cm = $('copycomment'); if (cm) cm.onclick = () => copyText(prComment(d), cm, 'Copied');
@@ -103,10 +125,10 @@ function renderGate(d) {
   touched.forEach(f => nodes.set(f, { id: f, kind: 't' }));
   d.companions.forEach(c => nodes.set(c.file, { id: c.file, kind: 'm' }));
   d.reviewers.forEach(r => nodes.set('@' + r.person, { id: '@' + r.person, kind: 'p' }));
-  const links = d.companions.map(c => ({ source: c.because, target: c.file, label: Math.round(c.confidence * 100) + '%', color: '#ffb454', dashed: true }));
-  d.reviewers.forEach(r => touched.slice(0, 3).forEach(f => links.push({ source: '@' + r.person, target: f, color: '#1d3b63' })));
+  const links = d.companions.map(c => ({ source: c.because, target: c.file, label: Math.round(c.confidence * 100) + '%', color: COL.warn, dashed: true }));
+  d.reviewers.forEach(r => touched.slice(0, 3).forEach(f => links.push({ source: '@' + r.person, target: f, color: COL.edge2 })));
   drawGraph($('ggraph'), [...nodes.values()], links, {
-    color: n => ({ t: '#ff6b6b', m: '#ffb454', p: '#6cb6ff' }[n.kind]), size: n => n.kind === 'p' ? 13 : 11,
+    color: n => ({ t: COL.risk, m: COL.warn, p: COL.info }[n.kind]), size: n => n.kind === 'p' ? 13 : 11,
     label: n => n.kind === 'p' ? n.id.slice(1) : short(n.id) });
 }
 async function runGate(body) {
@@ -177,7 +199,7 @@ async function loadMemory() {
   if (!rows.length) { el.innerHTML = '<p class="empty" style="padding:14px">Empty. Ask a question and this user\'s memory graph grows.</p>'; return; }
   el.innerHTML = ''; const nodes = {}, links = [];
   rows.forEach(r => { nodes[r.a] = { id: r.a, fact: r.a_label === 'Fact' }; nodes[r.b] = nodes[r.b] || { id: r.b }; links.push({ source: r.a, target: r.b, label: r.rel }); });
-  drawGraph(el, Object.values(nodes), links, { color: n => n.fact ? '#c4a7ff' : '#3b4a63' });
+  drawGraph(el, Object.values(nodes), links, { color: n => n.fact ? COL.mem : COL.node });
 }
 function addStep(ev) {
   const el = document.createElement('div'); el.className = 'step ' + ev.agent;
@@ -195,8 +217,8 @@ function handleEvent(ev, replay) {
     $('answer').className = ''; $('answer').textContent = ev.answer;
     $('gstate').innerHTML = (ev.grounded ? '<span class="badge ok">grounded in graph</span>' : '<span class="badge bad">ungrounded: withheld</span>') + (replay ? ' <span class="badge">recorded run</span>' : '');
     const hot = new Set(ev.graph.nodes.map(n => n.id)), all = [...new Map([...overviewData.nodes, ...ev.graph.nodes].map(n => [n.id, n])).values()];
-    drawGraph($('graph'), all, [...overviewData.links, ...ev.graph.links.map(l => ({ ...l, color: '#ff6b6b' }))],
-      { color: n => hot.has(n.id) ? '#ff6b6b' : '#3b4a63', size: n => hot.has(n.id) ? 14 : 9, label: n => hot.has(n.id) ? short(n.id) : '', onClick: pickNode });
+    drawGraph($('graph'), all, [...overviewData.links, ...ev.graph.links.map(l => ({ ...l, color: COL.risk }))],
+      { color: n => hot.has(n.id) ? COL.risk : COL.node, size: n => hot.has(n.id) ? 14 : 9, label: n => hot.has(n.id) ? short(n.id) : '', onClick: pickNode });
     if (!replay) loadMemory();
   }
 }
@@ -255,6 +277,7 @@ const BUILT_ON = ['FalkorDB', 'Cypher', 'PageRank', 'Shortest path', 'MCP', 'Fas
 $('track').innerHTML = [...BUILT_ON, ...BUILT_ON].map(x => `<span>${esc(x)}</span>`).join('');
 const fmt = n => n == null ? '–' : n >= 10000 ? (n / 1000).toFixed(n >= 100000 ? 0 : 1) + 'k' : String(n);
 function renderPreview(d) {
+  lastPreview = d;
   const top = d.companions.slice(0, 3).map(c => `<div class="comp"><div class="file">${esc(short(c.file))}</div><div class="conf"><div class="bar2"><i style="width:${Math.round(c.confidence * 100)}%"></i></div><b>${Math.round(c.confidence * 100)}%</b></div>
       <div class="why">usually changes with <code>${esc(base(c.because))}</code>, not in this PR</div></div>`).join('');
   $('pv-body').innerHTML = `<div><div class="verdict">${gaugeHTML(d.score, d.verdict, 'pvring')}<div style="flex:1;min-width:150px"><span class="tag ${d.verdict}">${d.verdict} RISK</span>
@@ -376,6 +399,13 @@ async function loadCheck(id) {
 /* ---------- copy buttons on code snippets ---------- */
 document.addEventListener('click', e => { const b = e.target.closest('[data-copy]'); if (b) copyText(b.parentElement.querySelector('pre').innerText, b, 'Copied'); });
 
+/* ---------- theme toggle ---------- */
+setTheme(document.documentElement.dataset.theme || 'dark', false);
+$('themebtn').onclick = () => { setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light', true); onThemeChange(); };
+try {  // follow the operating system until the user picks a theme
+  matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => { try { if (localStorage.getItem(THEME_KEY)) return; } catch (_) { /* ignore */ } setTheme(e.matches ? 'light' : 'dark', false); onThemeChange(); });
+} catch (e) { /* very old browsers */ }
+
 /* ---------- status line, help, keyboard shortcuts ---------- */
 function tickClock() { $('livetext').textContent = `live · ${repos.length || '–'} repos · ` + new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }); }
 setInterval(tickClock, 1000); tickClock();
@@ -385,6 +415,7 @@ document.addEventListener('keydown', e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const tag = (e.target.tagName || '').toLowerCase();
   if (['input', 'textarea', 'select'].includes(tag) || e.target.isContentEditable) return;
+  if (e.key === 't') { $('themebtn').click(); return; }
   if (e.key === '?') { $('helpdlg').showModal(); return; }
   if (e.key === '/') { e.preventDefault(); location.hash = '#gate'; setTimeout(() => $('prurl').focus(), 60); return; }
   if (gPending && Date.now() - gPending < 1200) {

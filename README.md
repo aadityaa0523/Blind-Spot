@@ -32,7 +32,7 @@ verdict on every PR and fail the check on HIGH; a plain HTTP API; and the MCP se
 security headers, lazy-loaded LLM library (server starts in seconds), PR lookups cached on disk, a bundled seed of real PRs so a fresh deployment
 has a populated board, and `render.yaml` + `Dockerfile` for hosting (see `DEPLOY.md`).
 
-Extras: keyboard shortcuts (`?` for help, `g b` board, `/` check a PR), "copy as PR comment", and PR lookups cached on disk
+Extras: **light and dark themes** (toggle in the header or press `t`; follows your system until you choose; both pass WCAG AA contrast on every page, checked by script), keyboard shortcuts (`?` for help, `g b` board, `/` check a PR), "copy as PR comment", and PR lookups cached on disk
 (merged PRs never change, so the 60 requests/hour anonymous GitHub limit is rarely hit).
 
 ## Does it work? (measured)
